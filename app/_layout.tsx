@@ -6,7 +6,7 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { useColorScheme } from '@/components/useColorScheme';
 
@@ -22,6 +22,42 @@ export const unstable_settings = {
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+const queryClient = new QueryClient()
+
+function RootLayoutNav() {
+  const colorScheme = useColorScheme();
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <GluestackUIProvider mode="light">
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ 
+              headerShown: false,
+            }} />
+            <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="search" options={{ 
+              headerBackTitle: "Back"
+             }} />
+            <Stack.Screen name="location" options={{ 
+              headerTitle: "Location",
+              headerBackTitle: "Back"
+             }} />
+            <Stack.Screen name="notifications" options={{ 
+              headerTitle: "Notifications",
+              headerBackTitle: "Back"
+             }} />
+            <Stack.Screen name="cart" options={{ 
+              headerTitle: "Cart",
+              headerBackTitle: "Back"
+             }} />
+          </Stack>
+        </ThemeProvider>
+      </GluestackUIProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -45,17 +81,4 @@ export default function RootLayout() {
   }
 
   return <GluestackUIProvider mode="light"><RootLayoutNav /></GluestackUIProvider>;
-}
-
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-
-  return (
-    <GluestackUIProvider mode="light"><ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-        </Stack>
-      </ThemeProvider></GluestackUIProvider>
-  );
 }
