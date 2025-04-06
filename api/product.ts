@@ -26,6 +26,40 @@ export const useFetchProductsQuery = () => {
     })
 }
 
+export const useFetchStoreQuery = (id: String) => {
+    return useQuery({
+        queryKey: ['store', id],
+        queryFn: async () => {
+            if (!process.env.EXPO_PUBLIC_CONSUMERSECRET || !process.env.EXPO_PUBLIC_CONSUMERKEY) {
+                throw new Error('Environment variables CONSUMER_SECRET and CONSUMER_KEY must be set')
+            }
+            if (isNaN(Number(id))) {
+                return {
+                    wcfmm: {},
+                    wc: {}
+                };
+            }
+            const res = await axios.get(`https://www.rushlane.net/wp-json/wcfmmp/v1/store-vendors/${id}`)
+            const res2= await axios.get(`https://www.rushlane.net/wp-json/wc/v3/customers/${id}`, {
+                params: {
+                    consumer_secret: process.env.EXPO_PUBLIC_CONSUMERSECRET,
+                    consumer_key: process.env.EXPO_PUBLIC_CONSUMERKEY,
+                }
+            })
+            if (res.status !== 200) {
+                throw new Error('Error: Failed to fetch products')
+            }
+            const data1 = await res.data
+            const data2 = await res2.data
+            return {
+                wcfmm : data1,
+                wc : data2
+            }
+        },
+        enabled: !!id,
+    })
+}
+
 export const useFetchStoresQuery = () => {
   const queryClient = useQueryClient();
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
@@ -66,9 +100,10 @@ export const useFetchStoresQuery = () => {
       }
       
       // Store data in AsyncStorage after successful fetch
-      try {
-        await AsyncStorage.setItem('stores', JSON.stringify(res.data));
-      } catch (error) {
+    try {
+      const filteredData = res.data.filter((store: any) => store.vendor_id !== 311);
+      await AsyncStorage.setItem('stores', JSON.stringify(filteredData));
+    } catch (error) {
         console.error('Error storing data:', error);
       }
       
@@ -127,7 +162,7 @@ export const useFetchCategoriesQuery = () => {
       }
       
       // Filter out categories without images
-      const categoriesWithImages = res.data.filter(category => 
+      const categoriesWithImages = res.data.filter((category:any) => 
         category.image !== null && category.image !== undefined
       );
       

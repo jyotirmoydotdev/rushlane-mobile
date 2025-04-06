@@ -14,12 +14,13 @@ import { Icon } from '@/components/ui/icon';
 import { Bell, Carrot, Navigation, Search, ShoppingCart, SlidersHorizontal, Truck } from 'lucide-react-native';
 import { ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Link } from 'expo-router';
+import { Link, Redirect, useRouter } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
 import * as Location from 'expo-location';
 import { Image, type ImageSource } from 'expo-image';
 import StoreCard from '@/components/storeCard';
 import { useFetchCategoriesQuery, useFetchStoresQuery } from '@/api/product';
+import { PlaceholdersAndVanishInput } from '@/components/PlaceHolderAndVanish';
 
 const blurhash =
   '|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[';
@@ -27,6 +28,8 @@ const blurhash =
 export default function TabOneScreen() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const router = useRouter();
 
   const categories = useFetchCategoriesQuery()
 
@@ -54,190 +57,187 @@ export default function TabOneScreen() {
   }
 
   return (
-    <VStack className='bg-[#f77057] pt-12'>
-      {/* <LinearGradient colors={['#F19280', 'f77057']} className=''>
-      </LinearGradient> */}
-      <LinearGradient colors={['#F19280', '#f77057']} className=''>
-        <VStack className='bg-white h-full rounded-t-3xl overflow-hidden p-2 gap-1'>
-          <Link href={"/search"} asChild>
-            <Pressable>
-              <Box className='mx-2 mt-4 mb-2 rounded-2xl h-12 bg-gray-100 flex-row items-center justify-between px-3 shadow-sm shadow-gray-300'>
-                <Box className='flex-row items-center'>
-                  <Icon as={Search} className='h-5 w-5 text-gray-500' />
-                  <Text className='ml-3 text-gray-500 text-base'>Search Food</Text>
-                </Box>
-                <Box className='flex-row items-center'>
-                  <Box className='h-5 w-0 mr-4 border-gray-300 border' />
-                  <Icon as={SlidersHorizontal} className='h-5 w-5 text-gray-500' />
-                </Box>
-              </Box>
-            </Pressable>
-          </Link>
-          <Box className='h-auto'>
-            <ScrollView
-              showsHorizontalScrollIndicator={false}
-              showsVerticalScrollIndicator={false}
-            >
-              <Box className='h-auto'>
-                <ScrollView
-                  horizontal={true}
-                  showsHorizontalScrollIndicator={false}
-                  className="flex-row px-2 py-2"
-                >
-                  <Box className='w-48 h-28 mr-4 bg-[#7FBCFF] rounded-2xl p-4 relative overflow-hidden'>
-                    <Box className=' size-28 bg-white/50 absolute -bottom-10 -right-10 rounded-full items-center justify-center' />
-                    <Icon className='h-8 w-8 absolute bottom-4 right-4 stroke-[#4999F0]' as={Truck} />
-                    <Text className='text-black font-semibold text-lg pb-1.5'>Pickup and Drop</Text>
-                    <Text className='font-medium'>At your</Text>
-                    <Text className='font-medium'>convenience</Text>
-                  </Box>
-                  <Box className='w-48 h-28 mr-4 bg-[#99E3AC] rounded-2xl p-4 relative overflow-hidden'>
-                    <Icon className='h-8 w-8 absolute bottom-4 right-4 stroke-[#115822]' as={Carrot} />
-                    <Box className=' size-28 bg-white/50 absolute -bottom-10 -right-10 rounded-full' />
-                    <Text className='text-black font-semibold text-lg'>Rushmart</Text>
-                    <Text className='font-medium'>Instant Grocery </Text>
-                    <Text className='font-medium'>service</Text>
-                  </Box>
-                  <Box className='w-28 h-28 mr-4 bg-[#f77057] rounded-2xl p-4 justify-center items-center relative'>
-                    <Box className=' size-24 bg-white/50 absolute  rounded-full' />
-                    <Text className='text-xl text-black font-semibold'>More</Text>
-                  </Box>
-                </ScrollView>
-              </Box>
-              <HStack className=' justify-between items-center px-4 mt-4'>
-                <Text className='text-2xl font-bold  text-gray-500'>Offers just for you</Text>
-                <Text className='text-base font-semibold text-[#f77057]'>View all </Text>
-              </HStack>
-              <Box className='h-auto'>
-                <ScrollView
-                  horizontal={true}
-                  showsHorizontalScrollIndicator={false}
-                  className="flex-row px-2 py-2"
-                >
-                  <Image
-                    alt='banner1'
-                    source={require('../../assets/images/banner1.jpg')}
-                    className=' mr-4 bg-red-100 rounded-2xl'
-                    placeholder={{ blurhash }}
-                    contentFit="cover"
-                    transition={1000}
-                    style={{
-                      width: 340,
-                      height: 144,
-                      borderRadius: 16,
-                      marginRight: 16,
-                    }}
-                  />
-                  <Image
-                    alt='banner1'
-                    source={require('../../assets/images/banner2.jpg')}
-                    className=' mr-4 bg-red-100 rounded-2xl'
-                    placeholder={{ blurhash }}
-                    contentFit="cover"
-                    transition={1000}
-                    style={{
-                      width: 340,
-                      height: 144,
-                      borderRadius: 16,
-                      marginRight: 16,
-                    }}
-                  />
-                </ScrollView>
-              </Box>
-              <HStack className=' justify-between items-center px-4 mt-4'>
-                <Text className='text-2xl font-bold  text-gray-500'>Trending right now</Text>
-                <Text className='text-base font-semibold text-[#f77057]'>View all </Text>
-              </HStack>
-              <Box className='h-auto'>
-                {
-                  categories.isError ? (
-                    <View>
-                      <Text>No Product to show</Text>
-                    </View>
-                  ) : (
-                    <ScrollView
-                      horizontal={true}
-                      showsHorizontalScrollIndicator={false}
-                      className="flex-row px-2 py-4 ">
-                      {
-                        categories.isLoading ? (
-                          <>
-                            <Box className='w-28 h-28 mr-4 bg-gray-100 rounded-full p-4 overflow-hidden' />
-                            <Box className='w-28 h-28 mr-4 bg-gray-100 rounded-full p-4 overflow-hidden' />
-                            <Box className='w-28 h-28 mr-4 bg-gray-100 rounded-full p-4 overflow-hidden' />
-                            <Box className='w-28 h-28 mr-4 bg-gray-100 rounded-full p-4 overflow-hidden' />
-                          </>
-                        ) : (
-                          categories.data?.map((category: any) => {
-                            if (!category.image) {
-                              return null;
-                            }
-                            return (
-                              <View key={category.id} className='flex flex-col items-center gap-4 mr-4 w-28'>
-                                <Box key={category.id} className='w-28 h-28 mr-4 bg-gray-100 rounded-full p-4 overflow-hidden flex items-center justify-center'>
-                                  <Image
-                                    alt='banner1'
-                                    source={{ uri: category.image.src }}
-                                    className='bg-red-100 rounded-full'
-                                    placeholder={{ blurhash }}
-                                    contentFit="cover"
-                                    transition={1000}
-                                    style={{
-                                      width: 100,
-                                      height: 100,
-                                      objectFit: 'cover',
-                                    }}
-                                  />
-                                </Box>
-                                <Text className=' line-clamp-1'>{category.name}</Text>
-                              </View>
-                            );
-                          })
-                        )
-                      }
-                    </ScrollView>
-                  )
-                }
+    <VStack className='bg-gray-50 pt-2 h-auto relative'>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+        <VStack className='bg-white h-full rounded-t-3xl overflow-hidden p-2'>
 
-              </Box>
-              <HStack className=' justify-between items-center px-4 mt-4 mb-2'>
-                <Text className='text-2xl font-bold  text-gray-500'>Top restaurants in town</Text>
-                {/* <Text className='text-base font-semibold text-[#f77057]'>View all </Text> */}
-              </HStack>
-              <Box className='h-auto flex-col px-2 py-2 '>
-                {
-                  stores.isLoading ? (
-                    <Text>Loading...</Text>
-                  ) : (
-                    stores.data?.map((item: any, index: number) => (
-                      <View key={index + 1}>
-                        <StoreCard
-                          id={item.id}
-                          storeAddress={item.vendor_address}
-                          storeRating={item.store_rating}
-                          storeBanner={item.vendor_banner}
-                          storeName={item.vendor_shop_name}
-                          storeLogo={item.vendor_shop_logo}
-                        />
-                      </View>
-                    ))
-                  )
-                }
-              </Box>
-              <Box className='h-[20rem] w-full'></Box>
+          {/* Services */}
+          <HStack className='w-full px-2 py-2 gap-3 mb-2'>
+            <Box className='flex-1 h-24 bg-blue-500 rounded-2xl px-4 py-2 relative overflow-hidden shadow-lg justify-center'>
+              <Box className='size-28 bg-white/60 absolute -bottom-10 -right-10 rounded-full items-center justify-center' />
+              <Icon className='h-8 w-8 absolute bottom-4 right-4 stroke-blue-500' as={Truck} />
+              <Text className='text-white font-bold text-xl pb-1'>Logistics</Text>
+              <Text className='text-white font-medium'>PickUp and </Text>
+              <Text className='text-white font-medium'>Drop</Text>
+            </Box>
+            <Box className='flex-1 h-24 bg-green-500 rounded-2xl px-4 py-2  relative overflow-hidden shadow-lg justify-center'>
+              <Box className='size-28 bg-white/60 absolute -bottom-10 -right-10 rounded-full items-center justify-center' />
+              <Icon className='h-8 w-8 absolute bottom-4 right-4 stroke-green-500' as={Carrot} />
+              <Text className='text-white font-semibold text-xl pb-1'>Rushmart</Text>
+              <Text className='text-white font-medium'>Instant Grocery</Text>
+              <Text className='text-white font-medium'>service</Text>
+            </Box>
+          </HStack>
+
+          {/* Offer Zone */}
+          <HStack className=' justify-between items-center px-4 mb-2'>
+            <Text className='text-2xl font-bold  text-gray-500'>Offer zone</Text>
+            <Text className='text-base font-semibold text-[#f77057]'>View all </Text>
+          </HStack>
+          <Box className='h-auto mb-4'>
+            <ScrollView
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+              className="flex-row px-2 "
+            >
+              <Image
+                alt='banner1'
+                source={require('../../assets/images/banner1.jpg')}
+                className=' mr-4 bg-red-100 rounded-2xl'
+                placeholder={{ blurhash }}
+                contentFit="cover"
+                transition={1000}
+                style={{
+                  width: 340,
+                  height: 144,
+                  borderRadius: 16,
+                  marginRight: 16,
+                }}
+              />
+              <Image
+                alt='banner1'
+                source={require('../../assets/images/banner2.jpg')}
+                className=' mr-4 bg-red-100 rounded-2xl'
+                placeholder={{ blurhash }}
+                contentFit="cover"
+                transition={1000}
+                style={{
+                  width: 340,
+                  height: 144,
+                  borderRadius: 16,
+                  marginRight: 16,
+                }}
+              />
             </ScrollView>
-            {/* <FlatList
-              data={stores.data}
-              // @ts-ignore
-              numColumns={1}
-              contentContainerClassName='gap-2 max-w-[960px] mx-auto w-full'
-              className=' pt-2'
-              renderItem={({ item }) => (<StoreCard key={item.id} storeBanner={item.vendor_banner} storeName={item.vendor_shop_name} storeLogo={item.vendor_shop_logo} />)}
-            /> */}
-            {/* <Text>{stores.isLoading ? "Loading..." : JSON.stringify(stores.data)}</Text> */}
           </Box>
+          <View className='flex-row justify-center items-center gap-2 w-full py-2'>
+            <Box className='size-2 rounded-full bg-gray-300'></Box>
+            <Box className='size-2 rounded-full bg-gray-300'></Box>
+          </View>
+
+          {/* Trending Categories */}
+          <HStack className=' justify-between items-center px-4 mb-2'>
+            <Text className='text-2xl font-bold  text-gray-500'>Trending right now</Text>
+            <Text className='text-base font-semibold text-[#f77057]'>View all </Text>
+          </HStack>
+          <Box className='h-auto mb-4'>
+            {
+              categories.isError ? (
+                <View>
+                  <Text>No Product to show</Text>
+                </View>
+              ) : (
+                <ScrollView
+                  horizontal={true}
+                  showsHorizontalScrollIndicator={false}
+                  className="flex-row px-2  ">
+                  {
+                    categories.isLoading ? (
+                      <>
+                        <View className='flex flex-col items-center gap-4 mr-4 w-28'>
+                          <Box className='w-28 h-28 mr-4 bg-gray-100 rounded-full border-2 border-orange-400 p-4 overflow-hidden flex items-center justify-center' />
+                          <Text className=' line-clamp-1'>Loading...</Text>
+                        </View>
+                        <View className='flex flex-col items-center gap-4 mr-4 w-28'>
+                          <Box className='w-28 h-28 mr-4 bg-gray-100 rounded-full border-2 border-orange-400 p-4 overflow-hidden flex items-center justify-center' />
+                          <Text className=' line-clamp-1'>Loading...</Text>
+                        </View>
+                        <View className='flex flex-col items-center gap-4 mr-4 w-28'>
+                          <Box className='w-28 h-28 mr-4 bg-gray-100 rounded-full border-2 border-orange-400 p-4 overflow-hidden flex items-center justify-center' />
+                          <Text className=' line-clamp-1'>Loading...</Text>
+                        </View>
+                        <View className='flex flex-col items-center gap-4 mr-4 w-28'>
+                          <Box className='w-28 h-28 mr-4 bg-gray-100 rounded-full border-2 border-orange-400 p-4 overflow-hidden flex items-center justify-center' />
+                          <Text className=' line-clamp-1'>Loading...</Text>
+                        </View>
+                      </>
+                    ) : (
+                      categories.data?.map((category: any) => {
+                        if (!category.image) {
+                          return null;
+                        }
+                        return (
+                          <View key={category.id} className='flex flex-col items-center gap-4 mr-4 w-28 '>
+                            <Box key={category.id} className='w-28 h-28 mr-4 bg-gray-100 rounded-full border-2 border-orange-400 p-4 overflow-hidden flex items-center justify-center'>
+                              <Image
+                                alt='banner1'
+                                source={{ uri: category.image.src }}
+                                className='bg-red-100 rounded-full '
+                                placeholder={{ blurhash }}
+                                contentFit="cover"
+                                transition={1000}
+                                style={{
+                                  width: 100,
+                                  height: 100,
+                                  objectFit: 'cover',
+                                }}
+                              />
+                            </Box>
+                            <Text className=' line-clamp-1'>{category.name}</Text>
+                          </View>
+                        );
+                      })
+                    )
+                  }
+                </ScrollView>
+              )
+            }
+
+          </Box>
+
+          {/* Top Restaurants */}
+          <HStack className=' justify-between items-center px-4 mb-2'>
+            <Text className='text-2xl font-bold  text-gray-500'>Top restaurants in town</Text>
+            {/* <Text className='text-base font-semibold text-[#f77057]'>View all </Text> */}
+          </HStack>
+          <Box className='h-auto flex-col px-2 py-2 mb-2 '>
+            {(() => {
+              if (stores.isLoading) {
+                return <Text>Loading...</Text>;
+              }
+
+              if (stores.isError) {
+                return <Text>Error loading stores. Please try again later.</Text>;
+              }
+
+              if (stores.data && stores.data.length > 0) {
+                const handlePress = (vendorId: number) => {
+                  router.push(`/store/${vendorId}`);
+                  console.log(`Pressed store with ID: ${vendorId}`);
+                };
+
+                return (
+                  stores.data.map((store: any) => (
+                    <Pressable key={store.vendor_id} onPress={() => handlePress(Number(store.vendor_id))}>
+                      <StoreCard
+                        id={store.vendor_id}
+                        storeAddress={store.vendor_address}
+                        storeRating={store.store_rating}
+                        storeBanner={store.vendor_banner}
+                        storeName={store.vendor_shop_name}
+                        storeLogo={store.vendor_shop_logo}
+                      />
+                    </Pressable>
+                  ))
+                );
+              }
+
+              return <Text>No stores available.</Text>;
+            })()}
+          </Box>
+
         </VStack>
-      </LinearGradient>
+      </ScrollView>
     </VStack>
   );
 }

@@ -8,6 +8,10 @@
 - GlueStack-UI
 - NativeWind
 
+## Endpoint
+
+
+
 ### Days 1–3: Environment Setup & Expo Basics
 - **Set Up:**  
   - Install Expo CLI and configure your development environment.

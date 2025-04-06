@@ -11,16 +11,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useColorScheme } from '@/components/useColorScheme';
 
 export {
-  // Catch any errors thrown by the Layout component.
   ErrorBoundary,
 } from 'expo-router';
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: '(tabs)',
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient()
@@ -33,25 +30,29 @@ function RootLayoutNav() {
       <GluestackUIProvider mode="light">
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack>
-            <Stack.Screen name="(tabs)" options={{ 
+            <Stack.Screen name="(tabs)" options={{
               headerShown: false,
             }} />
             <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-            <Stack.Screen name="search" options={{ 
+            <Stack.Screen name="search" options={{
               headerBackTitle: "Back"
-             }} />
-            <Stack.Screen name="location" options={{ 
+            }} />
+            <Stack.Screen name="location" options={{
               headerTitle: "Location",
               headerBackTitle: "Back"
-             }} />
-            <Stack.Screen name="notifications" options={{ 
+            }} />
+            <Stack.Screen name="notifications" options={{
               headerTitle: "Notifications",
               headerBackTitle: "Back"
-             }} />
-            <Stack.Screen name="cart" options={{ 
+            }} />
+            <Stack.Screen name="cart" options={{
               headerTitle: "Cart",
               headerBackTitle: "Back"
-             }} />
+            }} />
+            <Stack.Screen name="store" options={{
+              headerTitle: "Store",
+              headerBackTitle: "Back"
+            }} />
           </Stack>
         </ThemeProvider>
       </GluestackUIProvider>

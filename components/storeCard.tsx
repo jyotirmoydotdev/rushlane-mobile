@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 import { Icon } from "./ui/icon";
 import { Clock, Star, Zap } from "lucide-react-native";
 import { Badge } from "./ui/badge";
@@ -12,6 +12,7 @@ import { HStack } from "./ui/hstack";
 import { Circle } from "react-native-svg";
 import { Image } from "expo-image";
 import he from 'he';
+import { Link, useRouter } from "expo-router";
 
 type Props = {
     storeLogo: string,
@@ -24,7 +25,7 @@ type Props = {
 
 export default function StoreCard({ storeLogo, storeBanner, storeName, storeRating, storeAddress, id }: Props) {
     return (
-        <Card className=" rounded-3xl p-0 max-w-[360px] border border-gray-300 shadow-md shadow-gray-200 overflow-hidden mb-4">
+        <View className=" rounded-3xl p-0 max-w-[360px] border border-gray-300 shadow-md shadow-gray-200 overflow-hidden mb-4">
             <Image
                 source={{
                     uri: storeBanner
@@ -55,9 +56,6 @@ export default function StoreCard({ storeLogo, storeBanner, storeName, storeRati
                             </Text>
                             <Icon as={Clock} className=" stroke-white" />
                         </Badge>
-                        {/* <Box className=" w-fit bg-green-700 shadow-sm h-fit absolute -top-4 p-2 rounded-[8px] ">
-                    <Text className="px-2 text-base font-bold text-white">15 - 20 MINS</Text>
-                </Box> */}
                     </View>
                     <Heading size="xl" className="mb-2 font-black w-[16rem] line-clamp-1">
                         {he.decode(storeName)}
@@ -87,6 +85,6 @@ export default function StoreCard({ storeLogo, storeBanner, storeName, storeRati
                 />
             </HStack>
 
-        </Card>
-    );
+        </View>
+    )
 }
