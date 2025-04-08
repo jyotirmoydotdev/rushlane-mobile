@@ -25,12 +25,12 @@ type Props = {
 
 export default function StoreCard({ storeLogo, storeBanner, storeName, storeRating, storeAddress, id }: Props) {
     return (
-        <View className=" rounded-3xl p-0 max-w-[360px] border border-gray-300 shadow-md shadow-gray-200 overflow-hidden mb-4">
+        <View className=" rounded-3xl p-0 max-w-[360px] bg-white border border-gray-500/50 overflow-hidden mb-4">
             <Image
                 source={{
                     uri: storeBanner
                 }}
-                className=" bg-gray-200 rounded-t-3xl "
+                className=" bg-gray-200"
                 alt="image"
                 style={{
                     width: "100%",
@@ -64,7 +64,7 @@ export default function StoreCard({ storeLogo, storeBanner, storeName, storeRati
                         <Icon as={Star} className="fill-green-600 stroke-white" />
                         <Text className="text-lg font-semibold">{storeRating == 0 || storeRating == "" ? "0.0" : parseFloat(storeRating.toString()).toFixed(1)}</Text>
                         <Text className="text-lg font-semibold w-[12rem] line-clamp-1">
-                            {storeAddress}
+                            {he.decode(storeAddress??"")}
                         </Text>
                         {/* <Box className=" rounded-full size-1.5 bg-gray-300" />
                         <Text className="text-lg font-semibold text-emerald-500">Open</Text> */}

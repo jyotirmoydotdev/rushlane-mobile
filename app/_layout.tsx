@@ -3,12 +3,17 @@ import "@/global.css";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Link, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { useColorScheme } from '@/components/useColorScheme';
+import { Icon } from '@/components/ui/icon';
+import { Pressable, Text } from 'react-native';
+import { Box } from '@/components/ui/box';
+import { ShoppingCart } from 'lucide-react-native';
+import { useCart } from '@/lib/state/cartState';
 
 export {
   ErrorBoundary,
@@ -24,7 +29,7 @@ const queryClient = new QueryClient()
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-
+  const cartLength = useCart((state:any) => state.items.length);
   return (
     <QueryClientProvider client={queryClient}>
       <GluestackUIProvider mode="light">
@@ -33,7 +38,7 @@ function RootLayoutNav() {
             <Stack.Screen name="(tabs)" options={{
               headerShown: false,
             }} />
-            <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="modal" options={{ presentation: 'modal', contentStyle:{height: 180} }} />
             <Stack.Screen name="search" options={{
               headerBackTitle: "Back"
             }} />
@@ -47,11 +52,21 @@ function RootLayoutNav() {
             }} />
             <Stack.Screen name="cart" options={{
               headerTitle: "Cart",
-              headerBackTitle: "Back"
+              headerBackTitle: "Back",
             }} />
             <Stack.Screen name="store" options={{
               headerTitle: "Store",
-              headerBackTitle: "Back"
+              headerBackTitle: "Back",
+              headerRight: () => (
+                <Link href={"/cart"} asChild>
+                    <Pressable>
+                      <Box className='bg-black/0 w-12 h-12 flex-row items-center justify-center rounded-full aspect-square'>
+                        <Icon as={ShoppingCart} className='stroke-black' />
+                        <Text>{cartLength}</Text>
+                      </Box>
+                    </Pressable>
+                  </Link>
+              ),
             }} />
           </Stack>
         </ThemeProvider>

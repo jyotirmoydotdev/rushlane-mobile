@@ -192,13 +192,7 @@ export function PlaceholdersAndVanishInput({
   return (
     <View style={styles.container}>
       <View 
-      className='bg-white w-[100%] h-16 rounded-2xl overflow-hidden flex-row px-4 items-center relative border border-gray-400'
-      style={{
-        shadowColor: '#000000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-      }}
+      className='bg-white w-[100%] h-16 rounded-2xl overflow-hidden flex-row px-4 items-center relative border-2 border-gray-300'
       >
         {/* Canvas for animation */}
         {animating && (
@@ -246,7 +240,6 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 9,
     backgroundColor: '#ffffff',
   },
   inputContainer: {

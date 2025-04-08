@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { FontAwesome, Ionicons, FontAwesome6 } from '@expo/vector-icons';
 import { Link, Tabs } from 'expo-router';
-import { Pressable, SafeAreaView, View } from 'react-native';
+import { Button, Pressable, SafeAreaView, View } from 'react-native';
 
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
@@ -17,13 +17,16 @@ import * as Location from 'expo-location';
 import { Image } from 'expo-image';
 import { PlaceholdersAndVanishInput } from '@/components/PlaceHolderAndVanish';
 import { Switch } from '@/components/ui/switch';
-
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
+import * as Haptics from 'expo-haptics';
+import { useVegStatus } from '@/lib/state/filterState';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const setVegStatus = useVegStatus((state: any) => state.setVegStatus);
+  const getVegStatus:boolean = useVegStatus((state: any) => state.isVeg);
 
   useEffect(() => {
     async function getCurrentLocation() {
@@ -52,13 +55,16 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: useClientOnlyValue(false, true),
         headerStyle: {
-          backgroundColor: '#f77057',
+          backgroundColor: '#ffffff',
           borderColor: '#f77057',
           borderStyle: 'dashed',
           shadowOpacity: 0,
           elevation: 0,
           borderBottomWidth: 0,
         },
+        headerSearchBarOptions: {
+          placeholder: 'Search',
+        }
       }}>
 
       <Tabs.Screen
@@ -85,7 +91,7 @@ export default function TabLayout() {
                   </Avatar>
                   <Link href={'/location'} asChild>
                     <Pressable>
-                      <View className='rounded-lg flex-row items-center gap-2 py-2 px-3 bg-gray-100'>
+                      <View className='rounded-xl flex-row items-center gap-2 py-2 px-3 bg-white border-2 border-gray-300'>
                         <Icon as={errorMsg ? NavigationOff : Navigation} className='fill-orange-500 stroke-orange-500 h-4 w-4' />
                         <Text className='text-black text-lg font-bold text-center'>
                           {errorMsg ? "Allow Location" : location ? `${location?.coords.latitude.toFixed(2)}, ${location?.coords.longitude.toFixed(2)}` : "Loading..."}
@@ -115,8 +121,8 @@ export default function TabLayout() {
               </View>
 
               {/* Search bar at bottom */}
-              <View className='flex-row justify-center'>
-                <Link href={"/search"} className='flex-1 bg-white mb-2 pt-6 pl-2' asChild>
+              <View className='flex-row justify-center items-center px-4 gap-2'>
+                <Link href={"/search"} className='flex-1 bg-white mb-2 pt-6 ' asChild>
                   <Pressable>
                     <PlaceholdersAndVanishInput
                       placeholders={["Pizza", "Burger", "Ice Cream", "Sushi", "Pasta", "Tacos", "Steak", "Salad", "Sandwich", "Fried Chicken", "Noodles", "Dumplings", "Curry", "BBQ", "Seafood", "Ramen", "Donuts", "Waffles", "Pancakes", "Smoothies"]}
@@ -125,13 +131,15 @@ export default function TabLayout() {
                     />
                   </Pressable>
                 </Link>
-                <View className='flex-col items-center justify-center rounded-lg gap-0.5 pt-4 pr-4 '>
-                  <Text className='text-black italic text-lg font-bold'>VEG</Text>
-                   <Switch
-                   size='sm'
-                   thumbColor={'#f77057'}
-                   ios_backgroundColor={'#f7f7f7'}
-                   />
+                <View className='felx-col items-center justify-center pt-4'>
+                  <View className='flex-col items-center justify-center rounded-2xl border-2 h-16 border-gray-300 '>
+                    <Text className='text-black italic text-base font-bold'>VEG</Text>
+                    <Switch
+                      size='sm'
+                      value={getVegStatus}
+                      onValueChange={setVegStatus}
+                    />
+                  </View>
                 </View>
               </View>
             </SafeAreaView>
@@ -140,12 +148,22 @@ export default function TabLayout() {
             height: 160,
           },
         }}
-      />D
+        listeners={{
+          tabPress: () => {
+            Haptics.selectionAsync();
+          },
+        }}
+      />
       <Tabs.Screen
         name="orders"
         options={{
           title: 'Orders',
-          tabBarIcon: ({ color }) => <LucideReceiptText style={{ marginBottom: -3 }} size={24} color={color} />,
+          tabBarIcon: ({ color }) =>  <LucideReceiptText style={{ marginBottom: -3 }} size={24} color={color} />,
+        }}
+        listeners={{
+          tabPress: () => {
+            Haptics.selectionAsync();
+          },
         }}
       />
       <Tabs.Screen
@@ -153,6 +171,11 @@ export default function TabLayout() {
         options={{
           title: 'Account',
           tabBarIcon: ({ color }) => <LucideUserRound style={{ marginBottom: -3 }} size={24} color={color} />,
+        }}
+        listeners={{
+          tabPress: () => {
+            Haptics.selectionAsync();
+          },
         }}
       />
     </Tabs>
