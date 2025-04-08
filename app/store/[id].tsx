@@ -1,7 +1,7 @@
 import { View, Text, ActivityIndicatorComponent, ActivityIndicatorBase, ActivityIndicator, ScrollView } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { useFetchStoreQuery } from '@/lib/query/useFetchStoresQuery';
+import { useFetchStoreProductsQuery, useFetchStoreQuery } from '@/lib/query/useFetchStoresQuery';
 import { Image } from 'expo-image';
 import { Icon } from '@/components/ui/icon';
 import { Star } from 'lucide-react-native';
@@ -17,10 +17,13 @@ import { useVegStatus } from '@/lib/state/filterState';
 export default function StorePage() {
     const { id } = useLocalSearchParams();
     const fetchStore = useFetchStoreQuery(id as string);
+    const fetchStoreProducts = useFetchStoreProductsQuery(id as string);
+
     const addProduct = useCart((state: any) => state.addProduct);
     const cartItems = useCart((state: any) => state.items);
     const setVegStatus = useVegStatus((state: any) => state.setVegStatus);
     const getVegStatus:boolean = useVegStatus((state: any) => state.isVeg);
+
     const addToCart = (index: number) => {
         if (cartItems.length === 0) {
             addProduct(fetchStore.data?.storeProducts[index]);
@@ -49,7 +52,7 @@ export default function StorePage() {
                 <View className='flex-row gap-4 items-center'>
                     <Image
                         source={{
-                            uri: fetchStore.data?.storeDetails.vendor_shop_logo
+                            uri: fetchStore.data?.vendor_shop_logo
                         }}
                         className=" bg-gray-200 "
                         alt="image"
@@ -63,15 +66,15 @@ export default function StorePage() {
                         }}
                     />
                     <View className='flex-col gap-1'>
-                        <Text className=' text-3xl font-bold'>{fetchStore.data?.storeDetails.vendor_display_name}</Text>
-                        <Text className=' line-clamp-2 w-[12rem] text-base'>{fetchStore.data?.storeDetails.vendor_address}</Text>
+                        <Text className=' text-3xl font-bold'>{fetchStore.data?.vendor_display_name}</Text>
+                        <Text className=' line-clamp-2 w-[12rem] text-base'>{fetchStore.data?.vendor_address}</Text>
                         <View className='flex-row gap-2'>
                             <View className=' w-[4rem] flex-row gap-2 px-2 py-1 rounded-md bg-green-600 items-center justify-center'>
                                 <Icon as={Star} className=' stroke-white' />
-                                <Text className=' text-lg text-white'>{fetchStore.data?.storeDetails.store_rating}</Text>
+                                <Text className=' text-lg text-white'>{fetchStore.data?.store_rating}</Text>
                             </View>
                             {
-                                (fetchStore.data?.storeDetails.store_hide_email === "yes") && <Link href='/modal'>Email</Link>
+                                (fetchStore.data?.store_hide_email === "yes") && <Link href='/modal'>Email</Link>
                             }
                         </View>
                     </View>
@@ -99,7 +102,7 @@ export default function StorePage() {
             </View>
             <View className="flex-col gap-2">
                 <FlatList
-                    data={fetchStore.data?.storeProducts}
+                    data={fetchStoreProducts.data}
                     keyExtractor={(item) => item.id.toString()}
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={{ padding: 8 }}

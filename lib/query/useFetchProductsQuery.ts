@@ -4,6 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 
+
+// All Products
 export const useFetchProductsQuery = () => {
     return useQuery({
         queryKey: ['products'],

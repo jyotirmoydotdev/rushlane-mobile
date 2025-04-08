@@ -3,88 +3,101 @@ import axios from "axios"
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import { loadInitialData } from "../utils";
 
-export const useFetchStoreQuery = (id: String) => {
-    return useQuery({
-        queryKey: ['store', id],
-        queryFn: async () => {
-            if (!process.env.EXPO_PUBLIC_CONSUMERSECRET || !process.env.EXPO_PUBLIC_CONSUMERKEY) {
-                throw new Error('Environment variables CONSUMER_SECRET and CONSUMER_KEY must be set')
-            }
-            if (isNaN(Number(id))) {
-                return {
-                    storeDetails: null,
-                    storeProducts: null
-                };
-            }
-            const storeResponse = await axios.get(`https://www.rushlane.net/wp-json/wcfmmp/v1/store-vendors/${id}`)
-            const productResponse = await axios.get(`https://rushlane.net/wp-json/wcfmmp/v1/store-vendors/${id}/products`)
-            if (storeResponse.status !== 200 || productResponse.status !== 200) {
-                throw new Error('Error: Failed to fetch products')
-            }
-            const storeData = await storeResponse.data
-            const ProductData = await productResponse.data
-            return {
-                storeDetails: storeData,
-                storeProducts: ProductData
-            }
-        },
-        enabled: !!id,
-    })
+
+// Store Products
+export const useFetchStoreProductsQuery = (id: string) => {
+  const queryClient = useQueryClient();
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+  useEffect(() => {
+    loadInitialData(`storeProducts_${id}`, queryClient, setInitialDataLoaded);
+  }, [queryClient]);
+  
+  return useQuery({
+    queryKey: ['storeProducts', id],
+    queryFn: async () => {
+      if (isNaN(Number(id))) {
+        return null;
+      }
+      const res = await fetch(`/api/stores/${id}/products`)
+      if (res.ok !== true) {
+        throw new Error('Error: Failed to fetch store products')
+      }
+      const data = await res.json()
+      
+      try {
+        await AsyncStorage.setItem(`storeProducts_${id}`, JSON.stringify(data));
+      } catch (error) {
+        console.error('Error storing data:', error);
+      }
+      return data
+    },
+    enabled: initialDataLoaded && !!id,
+  })
 }
 
-export const useFetchStoresQuery = () => {
-    const queryClient = useQueryClient();
-    const [initialDataLoaded, setInitialDataLoaded] = useState(false);
-    
-    // Load data from AsyncStorage on component mount
-    useEffect(() => {
-      const loadInitialData = async () => {
-        try {
-          const storedData = await AsyncStorage.getItem('stores');
-          if (storedData) {
-            queryClient.setQueryData(['stores'], JSON.parse(storedData));
-          }
-          setInitialDataLoaded(true);
-        } catch (error) {
-          console.error('Error loading stored data:', error);
-          setInitialDataLoaded(true);
-        }
-      };
-      
-      loadInitialData();
-    }, [queryClient]);
-    
-    const query = useQuery({
-      queryKey: ['stores'],
-      queryFn: async () => {
-        if (!process.env.EXPO_PUBLIC_CONSUMERSECRET || !process.env.EXPO_PUBLIC_CONSUMERKEY) {
-          throw new Error('Environment variables CONSUMER_SECRET and CONSUMER_KEY must be set');
-        }
-        
-        const res = await axios.get(`https://www.rushlane.net/wp-json/wcfmmp/v1/store-vendors`, {
-          params: {
-            per_page: 40,
-            exclude: 110,
-          }
-        });
-        
-        if (res.status !== 200) {
-          throw new Error('Error: Failed to fetch stores');
-        }
-        
-        // Store data in AsyncStorage after successful fetch
+// Store Details
+export const useFetchStoreQuery = (id: String) => {
+  const queryClient = useQueryClient();
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+  useEffect(() => {
+    if (isNaN(Number(id))) {
+      throw new Error('Invalid store ID')
+    }
+    loadInitialData(`store_${id}`, queryClient, setInitialDataLoaded);
+  }, [queryClient]);
+  return useQuery({
+    queryKey: ['store', id],
+    queryFn: async () => {
+      if (isNaN(Number(id))) {
+        throw new Error('Invalid store ID')
+      }
+
+      const res = await fetch(`/api/stores/${id}`)
+
+      if (res.ok !== true) {
+        throw new Error('Error: Failed to fetch store')
+      }
+
+      const data = await res.json()
       try {
-        const filteredData = res.data.filter((store: any) => store.vendor_id !== 311);
-        await AsyncStorage.setItem('stores', JSON.stringify(filteredData));
+          await AsyncStorage.setItem(`store_${id}`, JSON.stringify(data));
       } catch (error) {
-          console.error('Error storing data:', error);
-        }
-        
-        return res.data;
-      },
-      enabled: initialDataLoaded, 
-    });
-    
-    return query;
-  };
+        console.error('Error storing data:', error);
+      }
+      return data
+    },
+    enabled: initialDataLoaded && !!id,
+  })
+}
+
+// All Stores
+export const useFetchStoresQuery = () => {
+  const queryClient = useQueryClient();
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+
+  useEffect(() => {
+    loadInitialData('stores', queryClient, setInitialDataLoaded);
+  }, [queryClient]);
+
+  const query = useQuery({
+    queryKey: ['stores'],
+    queryFn: async () => {
+      const res = await fetch(`/api/stores`);
+      if (res.ok !== true) {
+        throw new Error('Error: Failed to fetch stores');
+      }
+      const data = await res.json();
+      try {
+        await AsyncStorage.setItem('stores', JSON.stringify(data));
+      } catch (error) {
+        console.error('Error storing data:', error);
+      }
+      return data;
+    },
+    enabled: initialDataLoaded,
+  });
+
+  return query;
+};
