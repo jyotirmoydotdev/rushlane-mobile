@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { loadInitialData } from "../utils";
+import { storeType } from "../type/storeType";
 
 
 // Store Products
@@ -47,7 +48,7 @@ export const useFetchStoreQuery = (id: String) => {
     }
     loadInitialData(`store_${id}`, queryClient, setInitialDataLoaded);
   }, [queryClient]);
-  return useQuery({
+  return useQuery<storeType>({
     queryKey: ['store', id],
     queryFn: async () => {
       if (isNaN(Number(id))) {
@@ -60,7 +61,7 @@ export const useFetchStoreQuery = (id: String) => {
         throw new Error('Error: Failed to fetch store')
       }
 
-      const data = await res.json()
+      const data: storeType = await res.json()
       try {
           await AsyncStorage.setItem(`store_${id}`, JSON.stringify(data));
       } catch (error) {
@@ -81,14 +82,14 @@ export const useFetchStoresQuery = () => {
     loadInitialData('stores', queryClient, setInitialDataLoaded);
   }, [queryClient]);
 
-  const query = useQuery({
+  const query = useQuery<storeType[]>({
     queryKey: ['stores'],
     queryFn: async () => {
       const res = await fetch(`/api/stores`);
       if (res.ok !== true) {
         throw new Error('Error: Failed to fetch stores');
       }
-      const data = await res.json();
+      const data:storeType[] = await res.json();
       try {
         await AsyncStorage.setItem('stores', JSON.stringify(data));
       } catch (error) {

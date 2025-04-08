@@ -21,6 +21,15 @@ export async function GET(_request: Request) {
                 611, // French Fries
                 121, // Beverages
                 580, // Boba
+                // breakfast
+                // chicken
+                // rolls
+                // passtries
+                // desserts
+                // pasta
+                // curry
+                // soup
+                // paratha
             ],
         }
     });

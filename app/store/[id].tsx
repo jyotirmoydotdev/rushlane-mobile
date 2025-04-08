@@ -13,11 +13,14 @@ import ViewEmail from '@/components/ViewEmail';
 import { Link } from 'expo-router';
 import { Switch } from '@/components/ui/switch';
 import { useVegStatus } from '@/lib/state/filterState';
+import { storeType } from '@/lib/type/storeType';
+import he from 'he';
 
 export default function StorePage() {
     const { id } = useLocalSearchParams();
     const fetchStore = useFetchStoreQuery(id as string);
     const fetchStoreProducts = useFetchStoreProductsQuery(id as string);
+
 
     const addProduct = useCart((state: any) => state.addProduct);
     const cartItems = useCart((state: any) => state.items);
@@ -26,19 +29,19 @@ export default function StorePage() {
 
     const addToCart = (index: number) => {
         if (cartItems.length === 0) {
-            addProduct(fetchStore.data?.storeProducts[index]);
+            addProduct(fetchStoreProducts.data?.storeProducts[index]);
             return;
         }
         for (const item of cartItems) {
-            if (item.id === fetchStore.data?.storeProducts[index].id) {
+            if (item.id === fetchStoreProducts.data?.storeProducts[index].id) {
                 return;
             }
-            if (item.product.post_author !== fetchStore.data?.storeProducts[index].post_author) {
+            if (item.product.post_author !== fetchStoreProducts.data?.storeProducts[index].post_author) {
                 alert('You can only add products from the same store.');
                 return;
             }
         }
-        addProduct(fetchStore.data?.storeProducts[index]);
+        addProduct(fetchStoreProducts.data?.storeProducts[index]);
     }
     if (fetchStore.isLoading) {
         return <ActivityIndicator />
@@ -52,7 +55,7 @@ export default function StorePage() {
                 <View className='flex-row gap-4 items-center'>
                     <Image
                         source={{
-                            uri: fetchStore.data?.vendor_shop_logo
+                            uri: fetchStore.data?.logoUrl
                         }}
                         className=" bg-gray-200 "
                         alt="image"
@@ -66,15 +69,15 @@ export default function StorePage() {
                         }}
                     />
                     <View className='flex-col gap-1'>
-                        <Text className=' text-3xl font-bold'>{fetchStore.data?.vendor_display_name}</Text>
-                        <Text className=' line-clamp-2 w-[12rem] text-base'>{fetchStore.data?.vendor_address}</Text>
+                        <Text className=' text-3xl w-[14rem] font-bold'>{he.decode(fetchStore.data?.name ?? "")}</Text>
+                        <Text className=' line-clamp-2 w-[12rem] text-base'>{he.decode(fetchStore.data?.address ?? "")}</Text>
                         <View className='flex-row gap-2'>
                             <View className=' w-[4rem] flex-row gap-2 px-2 py-1 rounded-md bg-green-600 items-center justify-center'>
                                 <Icon as={Star} className=' stroke-white' />
-                                <Text className=' text-lg text-white'>{fetchStore.data?.store_rating}</Text>
+                                <Text className=' text-lg text-white'>{fetchStore.data?.rating}</Text>
                             </View>
                             {
-                                (fetchStore.data?.store_hide_email === "yes") && <Link href='/modal'>Email</Link>
+                                (fetchStore.data?.email) && <Link href='/modal'>Email</Link>
                             }
                         </View>
                     </View>

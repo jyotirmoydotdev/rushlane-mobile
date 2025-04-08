@@ -10,7 +10,6 @@ export async function loadInitialData(
     try {
         const cachedData = await AsyncStorage.getItem(key);
         if (cachedData) {
-          console.log(cachedData)
           queryClient.setQueryData([key], JSON.parse(cachedData));
         }
       } catch (error) {

@@ -219,19 +219,18 @@ export default function TabOneScreen() {
               if (stores.data && stores.data.length > 0) {
                 const handlePress = (vendorId: number) => {
                   router.push(`/store/${vendorId}`);
-                  console.log(`Pressed store with ID: ${vendorId}`);
                 };
 
                 return (
-                  stores.data.map((store: any) => (
-                    <Pressable className='shadow-md shadow-gray-300' key={store.vendor_id} onPress={() => handlePress(Number(store.vendor_id))}>
+                  stores.data.map((store) => (
+                    <Pressable className='shadow-md shadow-gray-300' key={store.id} onPress={() => handlePress(Number(store.id)??0)}>
                       <StoreCard
-                        id={store.vendor_id}
-                        storeAddress={store.vendor_address}
-                        storeRating={store.store_rating}
-                        storeBanner={store.vendor_banner}
-                        storeName={store.vendor_shop_name}
-                        storeLogo={store.vendor_shop_logo}
+                        id={Number(store.id)??0}
+                        storeAddress={store.address!}
+                        storeRating={store.rating}
+                        storeBanner={store.banner?.url!}
+                        storeName={store.name}
+                        storeLogo={store.logoUrl!}
                       />
                     </Pressable>
                   ))
