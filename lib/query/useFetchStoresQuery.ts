@@ -50,6 +50,7 @@ export interface StoreProductsPageResponse {
   };
 }
 
+// Store products
 export const useFetchStoreProductsQuery = (
   id: string,
   options?: {

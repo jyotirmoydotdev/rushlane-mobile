@@ -40,7 +40,7 @@ function RootLayoutNav() {
             }} />
             <Stack.Screen name="modal" options={{ presentation: 'modal', contentStyle:{height: 180} }} />
             <Stack.Screen name="search" options={{
-              headerBackTitle: "Back"
+              headerShown: true
             }} />
             <Stack.Screen name="location" options={{
               headerTitle: "Location",

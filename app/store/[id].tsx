@@ -21,7 +21,6 @@ export default function StorePage() {
     const { id } = useLocalSearchParams();
     const fetchStore = useFetchStoreQuery(id as string);
     const [searchQuery, setSearchQuery] = useState('');
-    const queryClient = useQueryClient();
 
     const addProduct = useCart((state: any) => state.addProduct);
     const cartItems = useCart((state: any) => state.items);
@@ -66,6 +65,7 @@ export default function StorePage() {
           hasNextPage:   data.pagination.hasNextPage,
         };
       };
+      
     // Use infinite query hook
     const {
         data,
