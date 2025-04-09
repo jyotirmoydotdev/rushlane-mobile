@@ -55,7 +55,7 @@ function RootLayoutNav() {
               headerBackTitle: "Back",
             }} />
             <Stack.Screen name="store" options={{
-              headerTitle: "Store",
+              headerTitle: '',
               headerBackTitle: "Back",
               headerRight: () => (
                 <Link href={"/cart"} asChild>
