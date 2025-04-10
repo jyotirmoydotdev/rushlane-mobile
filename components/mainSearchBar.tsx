@@ -245,7 +245,7 @@ export function PlaceholdersAndVanishInput({
         )}
         
         {/* Submit Button */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={[
             styles.submitButton,
             { 
@@ -261,7 +261,7 @@ export function PlaceholdersAndVanishInput({
             <Path d="M13 18l6 -6" />
             <Path d="M13 6l6 6" />
           </Svg>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       <StatusBar style={isDarkMode ? 'light' : 'dark'} />
     </View>

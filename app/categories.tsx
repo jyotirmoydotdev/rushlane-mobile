@@ -4,7 +4,7 @@ import { Platform, ScrollView, StyleSheet } from 'react-native';
 import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
 
-export default function ModalScreen() {
+export default function AllCategoriesPage() {
   return (
     <ScrollView style={styles.container}>
       <View className='flex-row gap-5 flex-wrap justify-center px-2 pt-4'>

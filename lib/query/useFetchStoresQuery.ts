@@ -7,38 +7,6 @@ import { loadInitialData } from "../utils";
 import { storeType } from "../type/storeType";
 
 
-// Store Products
-// export const useFetchStoreProductsQuery = (id: string) => {
-//   const queryClient = useQueryClient();
-//   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
-//   useEffect(() => {
-//     loadInitialData(`storeProducts_${id}`, queryClient, setInitialDataLoaded);
-//   }, [queryClient]);
-  
-//   return useQuery({
-//     queryKey: ['storeProducts', id],
-//     queryFn: async () => {
-//       if (isNaN(Number(id))) {
-//         return null;
-//       }
-//       const res = await fetch(`/api/stores/${id}/products`)
-//       if (res.ok !== true) {
-//         throw new Error('Error: Failed to fetch store products')
-//       }
-//       const data = await res.json()
-      
-//       try {
-//         await AsyncStorage.setItem(`storeProducts_${id}`, JSON.stringify(data));
-//       } catch (error) {
-//         console.error('Error storing data:', error);
-//       }
-//       return data
-//     },
-//     enabled: initialDataLoaded && !!id,
-//   })
-// }
-
-
 export interface StoreProductsPageResponse {
   products: storeType[];
   pagination: {

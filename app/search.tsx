@@ -1,35 +1,30 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, TextInput, StyleSheet, Dimensions, AppState, SafeAreaView, Text, ActivityIndicator, FlatList, ScrollView, Pressable, TouchableOpacity } from 'react-native';
+import { View, Text, ActivityIndicator, FlatList, ScrollView, Pressable, TouchableOpacity } from 'react-native';
 import { router, Stack } from 'expo-router';
-import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
-import { ArrowLeft, ArrowUp, Search, ShoppingCart, Utensils } from 'lucide-react-native';
-import { useFetchProductsQuery } from '@/lib/query/useFetchProductsQuery';
+import { Button, ButtonText } from '@/components/ui/button';
+import { ArrowUp, Search, ShoppingCart, Utensils } from 'lucide-react-native';
 import { Icon } from '@/components/ui/icon';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import ProductCard from '@/components/ProductCard';
 import { ProductType } from '@/lib/type/productType';
-import { Badge, BadgeText } from '@/components/ui/badge';
 import { PlaceholdersAndVanishInput } from '@/components/mainSearchBar';
 import { useFetchCategoriesQuery } from '@/lib/query/useFetchCategoriesQuery';
 import { Image } from 'expo-image';
 import { blurhash } from '@/constants/blurHash';
 import HalfScreenModal from '@/components/modelComp';
-import Animated, {
-  useAnimatedRef,
-  useAnimatedStyle,
-  useScrollViewOffset,
-  useAnimatedScrollHandler,
-  withTiming,
-  useSharedValue,
-} from 'react-native-reanimated'
+import Animated, { useAnimatedRef, useAnimatedStyle, useAnimatedScrollHandler, withTiming, useSharedValue } from 'react-native-reanimated'
+import { Checkbox, CheckboxIndicator, CheckboxIcon } from "@/components/ui/checkbox"
+import { CheckIcon } from "@/components/ui/icon"
 
 const AnimatedFlatList = Animated.FlatList;
 
 export default function SearchInput() {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<null | any>(null);
-  const [search, setSearch] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const [selectedCategory, setCategory] = useState<number>(0);
+
   const categories = useFetchCategoriesQuery();
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -67,8 +62,6 @@ export default function SearchInput() {
 
   // Debounced search handler
   const handleSearch = useCallback((text: string) => {
-    setSearch(text);
-
     // Clear previous timeout
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
@@ -98,6 +91,9 @@ export default function SearchInput() {
     const url = new URL(`/api/products`, window.location.origin);
     url.searchParams.append('page', pageParam.toString());
     url.searchParams.append('per_page', perPage.toString());
+    if (selectedCategory !== 0) {
+      url.searchParams.append('category', String(selectedCategory));
+    }
     if (searchQuery) url.searchParams.append('search', searchQuery);
 
     const res = await fetch(url.toString());
@@ -117,7 +113,7 @@ export default function SearchInput() {
   };
 
   const fetchProducts = useInfiniteQuery({
-    queryKey: ['storeProducts', searchQuery],
+    queryKey: ['storeProducts', searchQuery, selectedCategory],
     queryFn: fetchProductsfunc,
     initialPageParam: 1,
     getNextPageParam: last => last.nextPage ?? undefined,
@@ -167,14 +163,32 @@ export default function SearchInput() {
 
     return (
       <>
-        <Pressable onPress={() => router.push('/modal')} className='items-center mr-4'>
+        <Pressable onPress={() => router.push('/categories')} className='items-center mr-4'>
           <View className='w-20 h-20 flex-row justify-center items-center rounded-full bg-[#EAEAEA] mb-3'>
             <Icon as={Utensils} />
           </View>
           <Text className='mt-2 w-20 line-clamp-1 text-xs text-[#333] text-center'>View All</Text>
         </Pressable>
+        {/* {categories.data?.map((category: any) => (
+          <div
+            key={category.id}
+            className={`items-center mr-4 ${category.id === selectedCategory ? 'selected-class' : ''}`}
+            onClick={() => setCategory(category.id)}
+          >
+            {!category.image ? (
+              <div>{category.name.slice(0, 1)}</div>
+            ) : (
+              <img src={category.image} alt={category.name} />
+            )}
+            {category.name}
+          </div>
+        ))} */}
         {categories.data?.map((category: any) => (
-          <Pressable key={category.id} className='items-center mr-4'>
+          <TouchableOpacity
+            key={category.id}
+            className={`items-center mr-4`}
+            onPress={() => setCategory(category.id)}
+          >
             {!category.image ? (
               <View className='w-20 h-20 flex-row justify-center items-center rounded-full bg-[#EAEAEA] mb-3'>
                 <Text className='text-3xl font-bold'>{category.name.slice(0, 1)}</Text>
@@ -187,24 +201,25 @@ export default function SearchInput() {
                   height: 80,
                   borderRadius: 40,
                   backgroundColor: '#EAEAEA',
+                  borderWidth: 2,
+                  borderColor: category.id === selectedCategory ? '#f97316' : '#e5e7eb'
                 }}
                 cachePolicy={'disk'}
                 contentFit="cover"
                 placeholder={blurhash}
               />
             )}
-            <Text className='mt-2 w-20 line-clamp-1 text-xs text-[#333] text-center'>{category.name}</Text>
-          </Pressable>
+            <Text className={`mt-2 w-20 line-clamp-1 text-xs ${category.id === selectedCategory ? 'text-orange-500' : 'text-[#333]'} text-center`}>{category.name}</Text>
+          </TouchableOpacity>
         ))}
       </>
     );
-  }, [categories.isLoading, categories.isError, categories.data]);
+  }, [categories.isLoading, categories.isError, categories.data, selectedCategory]);
 
   // Memoize header component to prevent re-renders
   const ListHeader = useCallback(() => {
     return (
       <View className='my-4'>
-        <Text className='text-xl font-bold text-[#333] mb-4'>What's on your mind?</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className='mx-[-16px] px-4'>
           <CategoryList />
         </ScrollView>
@@ -218,10 +233,11 @@ export default function SearchInput() {
       return (
         <View className="flex items-center justify-center py-10">
           <ActivityIndicator size="large" color="#0000ff" />
+          <View className='h-20 w-full'></View>
         </View>
       );
     }
-
+  
     return (
       <View className="flex items-center justify-center py-10">
         <Icon as={Search} className="text-gray-300 size-10" />
@@ -229,6 +245,7 @@ export default function SearchInput() {
       </View>
     );
   }, [fetchProducts.isLoading, fetchProducts.isRefetching]);
+  
 
   // Memoize footer component
   const FooterComponent = useCallback(() => {
@@ -267,6 +284,7 @@ export default function SearchInput() {
       setSelectedItem={setSelectedItem}
     />
   ), []);
+
   return (
     <>
       <AnimatedFlatList
@@ -313,8 +331,7 @@ export default function SearchInput() {
         ListFooterComponent={FooterComponent}
         renderItem={renderItem}
       />
-      <Animated.View
-        className='absolute bottom-12 right-5' style={scrollToTopButtonStyle}>
+      <Animated.View className='absolute bottom-12 right-5' style={scrollToTopButtonStyle}>
         <TouchableOpacity
           onPress={scrollToTop}
           style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}
@@ -333,9 +350,38 @@ export default function SearchInput() {
           height={60}
         >
           {selectedItem && (
-            <View className='flex-row'>
-              <Text>{selectedItem.id}</Text>
-            </View>
+            <FlatList
+              data={selectedItem.attributes}
+              keyExtractor={(item) => item.id.toString()}
+
+              renderItem={({ item }) => (
+                <View className='flex-col justify-between mb-4 gap-4 border-b border-gray-300 pb-4'>
+                  <View>
+                    <Text className='text-2xl font-semibold'>{item.name}</Text>
+                    <Text>{`Choose one out of this ${item.options.length} options`}</Text>
+                  </View>
+                  <View className='flex-col gap-2'>
+                    {item.options.map((option: any, index: number) => (
+                      <View key={index} className='flex flex-row gap-2'>
+                        <Checkbox size="md" value=''>
+                          <CheckboxIndicator>
+                            <CheckboxIcon as={CheckIcon} />
+                          </CheckboxIndicator>
+                        </Checkbox>
+                        <Text>{option}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              )}
+              ListFooterComponent={() => (
+                <Button>
+                  <ButtonText>
+                    Add to Cart
+                  </ButtonText>
+                </Button>
+              )}
+            />
           )}
         </HalfScreenModal>
       )}

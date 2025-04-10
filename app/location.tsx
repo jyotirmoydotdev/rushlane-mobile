@@ -8,6 +8,13 @@ import { Image } from 'expo-image';
 import { Bookmark, ChefHat, Circle, Save, Share, SquareSquare, Star, Triangle, Vegan } from 'lucide-react-native';
 import React, { useState } from 'react'
 import he from 'he';
+import {
+  Checkbox,
+  CheckboxIndicator,
+  CheckboxLabel,
+  CheckboxIcon,
+} from "@/components/ui/checkbox"
+import { CheckIcon } from "@/components/ui/icon"
 
 import { View, Text, FlatList } from 'react-native';
 
@@ -659,7 +666,7 @@ export default function Location() {
     },
   ]
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const openModal = (item) => {
     setSelectedItem(item);
     setModalVisible(true);
@@ -694,27 +701,26 @@ export default function Location() {
                   <Text className='text-lg font-semibold'>₹ {item.price}</Text>
                 )
               }
-                <View className='flex-row gap-1 items-center'>
+              <View className='flex-row gap-1 items-center'>
                 {Array.from({ length: 5 }, (_, index) => (
                   <Icon
-                  key={index}
-                  as={Star}
-                  className={`w-3 h-3 ${
-                    index < Math.round(Number(item.average_rating))
-                    ? 'fill-yellow-400 stroke-yellow-500'
-                    : 'fill-gray-300 stroke-gray-400'
-                  }`}
+                    key={index}
+                    as={Star}
+                    className={`w-3 h-3 ${index < Math.round(Number(item.average_rating))
+                      ? 'fill-yellow-400 stroke-yellow-500'
+                      : 'fill-gray-300 stroke-gray-400'
+                      }`}
                   />
                 ))}
                 <Text className='text-sm px-1 text-gray-500'>({item.rating_count})</Text>
-                </View>
+              </View>
               <View className='flex-row items-center gap-1'>
                 <Icon as={ChefHat} className='w-4 h-4 stroke-blue-500' />
                 <Text className='text-base text-blue-500 font-medium'>{item.store.vendor_shop_name}</Text>
               </View>
               <View className='flex-row gap-2 pt-2'>
-                <View className=' p-2 bg-gray-50 rounded-full border border-gray-200 outline'><Icon as={Bookmark} className='stroke-gray-500'/></View>
-                <View className=' p-2 bg-gray-50 rounded-full border border-gray-200 outline'><Icon as={Share} className='stroke-gray-500'/></View>
+                <View className=' p-2 bg-gray-50 rounded-full border border-gray-200 outline'><Icon as={Bookmark} className='stroke-gray-500' /></View>
+                <View className=' p-2 bg-gray-50 rounded-full border border-gray-200 outline'><Icon as={Share} className='stroke-gray-500' /></View>
               </View>
             </View>
             {/* Image */}
@@ -737,11 +743,11 @@ export default function Location() {
                 }}
               />
               <View className='absolute flex-row items-center justify-center bottom-4 w-full'>
-                  <Button className=' w-[8rem] rounded-full bg-orange-500/80 border border-orange-400' onPress={() => openModal(item)} >
-                    <ButtonText className='text-xl text-white'>
-                      {item.attributes.length > 0 ? 'SELECT' : 'ADD'}
-                    </ButtonText>
-                  </Button>
+                <Button className=' w-[8rem] rounded-full bg-orange-500/80 border border-orange-400' onPress={() => openModal(item)} >
+                  <ButtonText className='text-xl text-white'>
+                    {item.attributes.length > 0 ? 'SELECT' : 'ADD'}
+                  </ButtonText>
+                </Button>
               </View>
             </View>
           </View>
@@ -751,14 +757,43 @@ export default function Location() {
       <HalfScreenModal
         isVisible={modalVisible}
         onClose={closeModal}
-        title="Product Details"
+        title="Select Options"
         data={selectedItem}
         height={60} // 60% of screen height
       >
         {selectedItem && (
-          <View className='flex-row'>
+          <FlatList
+            data={selectedItem.attributes}
+            keyExtractor={(item) => item.id.toString()}
 
-          </View>
+            renderItem={({ item }) => (
+              <View className='flex-col justify-between mb-4 gap-4 border-b border-gray-300 pb-4'>
+                <View>
+                  <Text className='text-2xl font-semibold'>{item.name}</Text>
+                  <Text>{`Choose one out of this ${item.options.length} options`}</Text>
+                </View>
+                <View className='flex-col gap-2'>
+                  {item.options.map((option, index) => (
+                    <View key={index} className='flex flex-row gap-2'>
+                      <Checkbox size="md" value=''>
+                        <CheckboxIndicator>
+                          <CheckboxIcon as={CheckIcon} />
+                        </CheckboxIndicator>
+                      </Checkbox>
+                      <Text>{option}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+            ListFooterComponent={() => (
+              <Button>
+                <ButtonText>
+                  Add to Cart
+                </ButtonText>
+              </Button>
+            )}
+          />
         )}
       </HalfScreenModal>
     </View>

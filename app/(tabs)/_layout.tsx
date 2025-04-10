@@ -138,6 +138,7 @@ export default function TabLayout() {
                       size='sm'
                       value={getVegStatus}
                       onValueChange={setVegStatus}
+                      isDisabled={true}
                     />
                   </View>
                 </View>

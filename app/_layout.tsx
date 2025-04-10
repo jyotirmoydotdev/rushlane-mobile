@@ -38,7 +38,7 @@ function RootLayoutNav() {
             <Stack.Screen name="(tabs)" options={{
               headerShown: false,
             }} />
-            <Stack.Screen name="modal" options={{ 
+            <Stack.Screen name="categories" options={{ 
               presentation: 'modal',
               headerTitle: "Categories",
               sheetElevation: 0,

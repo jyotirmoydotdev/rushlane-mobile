@@ -169,7 +169,7 @@ export default function TabOneScreen() {
                   <Text>Something went wrong while fetching Categories...</Text>
                 ) : (
                   <>
-                  <Pressable onPress={()=>router.push('/modal')} className=' items-center mr-4'>
+                  <Pressable onPress={()=>router.push('/categories')} className=' items-center mr-4'>
                       <View className='w-20 h-20 flex-row justify-center items-center rounded-full bg-[#EAEAEA] mb-3'>
                         <Icon as={Utensils}/>
                       </View>

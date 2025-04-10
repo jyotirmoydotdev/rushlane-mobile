@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native'
+import { View, Text, TouchableOpacity } from 'react-native'
 import { StyleSheet } from 'react-native';
 import React from 'react'
 import { Icon } from './ui/icon';
@@ -6,6 +6,8 @@ import { Bookmark, Share, ChefHat, Star, Triangle, Circle } from 'lucide-react-n
 import { blurhash } from '@/constants/blurHash';
 import { Button, ButtonText } from './ui/button';
 import { Image } from 'expo-image';
+import { router } from 'expo-router';
+import he from 'he';
 
 type Props = {
   id: string | number,
@@ -38,7 +40,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, setSelectedItem, setMod
 
   return (
     <View className='flex-row justify-between w-full mb-4 gap-4 border-b border-gray-200 pb-4'>
-      <View className='flex-col w-[12rem] gap-1.5 justify-start'>
+      <View className='w-1/2 flex-col gap-1.5 justify-start'>
         <Text className=' text-xl font-bold'>{item.name}</Text>
         {
           item.on_sale ? (
@@ -63,10 +65,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, setSelectedItem, setMod
           ))}
           <Text className='text-sm px-1 text-gray-500'>({item.rating_count})</Text>
         </View>
-        <View className='flex-row items-center gap-1'>
+        <TouchableOpacity onPress={()=>router.push(`/store/${item.store.vendor_id}`)} className='flex-row items-center gap-1'>
           <Icon as={ChefHat} className='w-4 h-4 stroke-blue-500' />
-          <Text className='text-base text-blue-500 font-medium'>{item.store.vendor_shop_name}</Text>
-        </View>
+          <Text className='text-base text-blue-500 font-medium'>{he.decode(item.store.vendor_shop_name)}</Text>
+        </TouchableOpacity>
         <View className='flex-row gap-2 pt-2 items-center'>
           <View className=' p-2.5 bg-gray-50 rounded-full border border-gray-200 outline'>
             {
@@ -97,14 +99,19 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, setSelectedItem, setMod
             marginRight: 16,
             borderColor: '#E5E7EB',
             borderWidth: 1,
+
           }}
         />
         <View className='absolute flex-row items-center justify-center bottom-4 w-full'>
-          <Button className=' w-[8rem] rounded-full bg-orange-500/80 border border-orange-400' onPress={() => openModal(item)} >
-            <ButtonText className='text-xl text-white'>
-              {item.attributes.length > 0 ? 'SELECT' : 'ADD'}
-            </ButtonText>
-          </Button>
+          {item.attributes.length > 0 ? (
+            <Button className=' w-[8rem] rounded-full bg-orange-500/80 border border-orange-400' onPress={() => openModal(item)} >
+              <ButtonText className='text-xl text-white'>SELECT</ButtonText>
+            </Button>
+          ) : (
+            <Button className=' w-[8rem] rounded-full bg-orange-500/80 border border-orange-400'>
+              <ButtonText className='text-xl text-white'>ADD</ButtonText>
+            </Button>
+          )}
         </View>
       </View>
     </View>

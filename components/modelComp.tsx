@@ -30,12 +30,12 @@ const HalfScreenModal: React.FC<HalfScreenModalProps> = ({
       Animated.spring(animation, {
         toValue: 1,
         useNativeDriver: true,
-        tension: 2,
+        tension: 0,
       }).start();
     } else {
       Animated.timing(animation, {
         toValue: 0,
-        duration: 100,
+        duration: 0,
         useNativeDriver: true,
       }).start();
     }
@@ -67,7 +67,7 @@ const HalfScreenModal: React.FC<HalfScreenModalProps> = ({
                 <Text style={styles.title}>{title}</Text>
               </View>
             ) : null}
-            
+
             <View style={styles.contentContainer}>
               {children ? children : (
                 <Text>Modal content goes here. Received data: {JSON.stringify(data)}</Text>
