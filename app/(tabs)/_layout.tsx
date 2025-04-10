@@ -77,7 +77,7 @@ export default function TabLayout() {
           headerStyle: {
             backgroundColor: '#ffffff',
           },
-          header: ({ navigation, route, options, }) => (
+          header: () => (
             <SafeAreaView style={{ backgroundColor: '#ffffff' }}>
               {/* Top portion with existing header content */}
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -103,13 +103,13 @@ export default function TabLayout() {
 
                 {/* Right side */}
                 <HStack className='gap-0 pr-4 pt-4'>
-                  <Link href={"/notifications"} asChild>
+                  {/* <Link href={"/notifications"} asChild>
                     <Pressable>
                       <Box className='bg-black/0 w-12 h-12 flex items-center justify-center rounded-full aspect-square'>
                         <Icon as={Bell} className='stroke-black' />
                       </Box>
                     </Pressable>
-                  </Link>
+                  </Link> */}
                   <Link href={"/cart"} asChild>
                     <Pressable>
                       <Box className='bg-black/0 w-12 h-12 flex items-center justify-center rounded-full aspect-square'>

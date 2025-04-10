@@ -18,7 +18,7 @@ export async function GET(request: Request, { id }: Record<string, string>) {
         per_page: parseInt(url.searchParams.get('per_page') || '10', 10),
         search: url.searchParams.get('search') || undefined,
         category: url.searchParams.get('category') || undefined,
-        orderby: url.searchParams.get('orderby') || undefined,
+        orderby: url.searchParams.get('orderby') || 'popularity',
         order: (url.searchParams.get('order') as 'asc' | 'desc') || undefined,
     }
 
@@ -32,6 +32,7 @@ export async function GET(request: Request, { id }: Record<string, string>) {
         apiUrl.searchParams.append('page', String(currentPage));
         apiUrl.searchParams.append('per_page', String(perPage));
         apiUrl.searchParams.append('status', 'publish');
+        apiUrl.searchParams.append('type', 'simple');
         apiUrl.searchParams.append('consumer_secret', String(process.env.EXPO_PUBLIC_CONSUMERSECRET));
         apiUrl.searchParams.append('consumer_key', String(process.env.EXPO_PUBLIC_CONSUMERKEY));
 

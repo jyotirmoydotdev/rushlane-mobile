@@ -10,6 +10,7 @@ export async function GET(_request: Request) {
             consumer_secret: process.env.EXPO_PUBLIC_CONSUMERSECRET,
             consumer_key: process.env.EXPO_PUBLIC_CONSUMERKEY,
             orderby: 'include',
+            per_page: 20,
             include: [
                 124, // Pizza
                 111, // Noodles
@@ -23,13 +24,13 @@ export async function GET(_request: Request) {
                 580, // Boba
                 // breakfast
                 // chicken
-                // rolls
+                141, // rolls
                 // passtries
-                // desserts
+                597, // desserts
                 // pasta
-                // curry
-                // soup
-                // paratha
+                116, // curry
+                143, // soup
+                376, // paratha
             ],
         }
     });

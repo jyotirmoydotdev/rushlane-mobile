@@ -5,7 +5,7 @@ import { Text } from '@/components/ui/text';
 import { Box } from '@/components/ui/box';
 import { HStack } from '@/components/ui/hstack';
 import { Icon } from '@/components/ui/icon';
-import { ArrowUp, Carrot, Store, Truck } from 'lucide-react-native';
+import { ArrowUp, Carrot, Store, Truck, Utensils } from 'lucide-react-native';
 import { ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -77,16 +77,16 @@ export default function TabOneScreen() {
         <VStack className='bg-white h-full rounded-t-3xl overflow-hidden p-2'>
           {/* Services */}
           <HStack className='w-full px-2 py-2 gap-3 mb-2'>
-            <Box className='flex-1 h-24 bg-blue-400 border border-[#ffffff80] rounded-3xl px-4 py-2 relative overflow-hidden shadow-lg justify-center'>
+            <Box className='flex-1 h-24 bg-blue-500 border border-[#ffffff80] rounded-3xl px-4 py-2 relative overflow-hidden shadow-lg justify-center'>
               <Box className='size-28 bg-white/60 absolute -bottom-10 -right-10 rounded-full items-center justify-center' />
-              <Icon className='h-8 w-8 absolute bottom-4 right-4 stroke-blue-500' as={Truck} />
+              <Icon className='h-8 w-8 absolute bottom-4 right-4 stroke-blue-600' as={Truck} />
               <Text className='text-white font-bold text-xl pb-1'>Logistics</Text>
               <Text className='text-white font-medium'>PickUp and </Text>
               <Text className='text-white font-medium'>Drop</Text>
             </Box>
-            <Box className='flex-1 h-24 bg-green-400 border border-[#ffffff80] rounded-3xl px-4 py-2  relative overflow-hidden shadow-lg justify-center'>
+            <Box className='flex-1 h-24 bg-green-500 border border-[#ffffff80] rounded-3xl px-4 py-2  relative overflow-hidden shadow-lg justify-center'>
               <Box className='size-28 bg-white/60 absolute -bottom-10 -right-10 rounded-full items-center justify-center' />
-              <Icon className='h-8 w-8 absolute bottom-4 right-4 stroke-green-500' as={Carrot} />
+              <Icon className='h-8 w-8 absolute bottom-4 right-4 stroke-green-600' as={Carrot} />
               <Text className='text-white font-semibold text-xl pb-1'>Rushmart</Text>
               <Text className='text-white font-medium'>Instant Grocery</Text>
               <Text className='text-white font-medium'>service</Text>
@@ -94,7 +94,7 @@ export default function TabOneScreen() {
           </HStack>
 
           {/* Offer Zone */}
-          <HStack className=' justify-between items-center px-4 mb-4'>
+          {/* <HStack className=' justify-between items-center px-4 mb-4'>
             <Text className='text-xl font-bold text-[#333]'>Offer zone</Text>
             <Text className='text-base font-semibold text-[#f77057]'>View all </Text>
           </HStack>
@@ -137,16 +137,28 @@ export default function TabOneScreen() {
           <View className='flex-row justify-center items-center gap-2 w-full py-2'>
             <Box className='size-2 rounded-full bg-gray-300'></Box>
             <Box className='size-2 rounded-full bg-gray-300'></Box>
-          </View>
+          </View> */}
 
           {/* Categories */}
           <View className='mt-4 px-4'>
             <Text className='text-xl font-bold text-[#333] mb-4'>What's on your mind?</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className='mx-[-16px] px-4'>
-              {(categories.isLoading || categories.isRefetching) ? (
+              {(categories.isLoading) ? (
                 Array(4).fill(0).map((_, i) => (
                   <View key={i} className='mr-4 rounded-full '>
-                    <View className='w-20 h-20 rounded-full bg-[#EAEAEA]' />
+                    <Image 
+                    source={{ uri: '' }}
+                    style={{
+                      width: 80,
+                      height: 80,
+                      backgroundColor: '#EAEAEA',
+                      borderRadius: 40,
+                    }}
+                    cachePolicy={'disk'}
+                    contentFit="cover"
+                    transition={1000}
+                    placeholder={{blurhash}}
+                     />
                     <View className='mt-2 w-20'>
                       <Text className='line-clamp-1 text-xs text-[#333] text-center'>loading...</Text>
                     </View>
@@ -155,29 +167,39 @@ export default function TabOneScreen() {
               ) : (
                 categories.isError ? (
                   <Text>Something went wrong while fetching Categories...</Text>
-                ):(
-                  categories.data?.map((category: any) => (
-                    <Pressable key={category.id} className=' items-center mr-4'>
-                      {
-                        !category.image ? (
-                          <View className='w-20 h-20 flex-row justify-center items-center rounded-full bg-[#EAEAEA] mb-3'>
-                            <Text className='text-3xl font-bold'>{category.name.slice(0,1)}</Text>
-                          </View>
-                        ) :
-                          (<Image
-                            source={{ uri: category.image?.src }}
-                            style={{
-                              width: 80,
-                              height: 80,
-                              borderRadius: 40,
-                            }}
-                            contentFit="cover"
-                            placeholder={blurhash}
-                          />)
-                      }
-                      <Text className='mt-2 w-20 line-clamp-1 text-xs text-[#333] text-center'>{category.name}</Text>
+                ) : (
+                  <>
+                  <Pressable onPress={()=>router.push('/modal')} className=' items-center mr-4'>
+                      <View className='w-20 h-20 flex-row justify-center items-center rounded-full bg-[#EAEAEA] mb-3'>
+                        <Icon as={Utensils}/>
+                      </View>
+                      <Text className='mt-2 w-20 line-clamp-1 text-xs text-[#333] text-center'>View All</Text>
                     </Pressable>
-                  ))
+                    {
+                      categories.data?.map((category: any) => (
+                        <Pressable key={category.id} className=' items-center mr-4'>
+                          {
+                            !category.image ? (
+                              <View className='w-20 h-20 flex-row justify-center items-center rounded-full bg-[#EAEAEA] mb-3'>
+                                <Text className='text-3xl font-bold'>{category.name.slice(0, 1)}</Text>
+                              </View>
+                            ) :
+                              (<Image
+                                source={{ uri: category.image?.src }}
+                                style={{
+                                  width: 80,
+                                  height: 80,
+                                  borderRadius: 40,
+                                }}
+                                contentFit="cover"
+                                placeholder={blurhash}
+                              />)
+                          }
+                          <Text className='mt-2 w-20 line-clamp-1 text-xs text-[#333] text-center'>{category.name}</Text>
+                        </Pressable>
+                      ))
+                    }
+                  </>
                 )
               )}
             </ScrollView>
@@ -193,21 +215,21 @@ export default function TabOneScreen() {
               if (stores.isLoading) {
                 return (
                   <>
-                  <StoreCard
-                  id={0}
-                  storeAddress='Loading...'
-                  storeRating={0}
-                  storeBanner={''}
-                  storeName='Loading...'
-                  storeLogo={''}
-                /><StoreCard
-                id={0}
-                storeAddress='Loading...'
-                storeRating={0}
-                storeBanner={''}
-                storeName='Loading...'
-                storeLogo={''}
-              />
+                    <StoreCard
+                      id={0}
+                      storeAddress='Loading...'
+                      storeRating={0}
+                      storeBanner={''}
+                      storeName='Loading...'
+                      storeLogo={''}
+                    /><StoreCard
+                      id={0}
+                      storeAddress='Loading...'
+                      storeRating={0}
+                      storeBanner={''}
+                      storeName='Loading...'
+                      storeLogo={''}
+                    />
                   </>
                 );
               }
@@ -223,9 +245,9 @@ export default function TabOneScreen() {
 
                 return (
                   stores.data.map((store) => (
-                    <Pressable className='shadow-md shadow-gray-300' key={store.id} onPress={() => handlePress(Number(store.id)??0)}>
+                    <Pressable className='shadow-md shadow-gray-300' key={store.id} onPress={() => handlePress(Number(store.id) ?? 0)}>
                       <StoreCard
-                        id={Number(store.id)??0}
+                        id={Number(store.id) ?? 0}
                         storeAddress={store.address!}
                         storeRating={store.rating}
                         storeBanner={store.banner?.url!}

@@ -1,14 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, TextInput, StyleSheet, Animated, Dimensions, Text, TouchableOpacity } from 'react-native';
+import { View, TextInput, StyleSheet, Animated, Dimensions, AppState, TouchableOpacity } from 'react-native';
 import { Canvas, Circle, Group, useCanvasRef } from '@shopify/react-native-skia';
 import { StatusBar } from 'expo-status-bar';
-import { useColorScheme, AppState } from 'react-native';
+import { useColorScheme } from 'react-native';
 import { Svg, Line, Path } from 'react-native-svg';
-import { Icon } from './ui/icon';
-import { Search } from 'lucide-react-native';
-
-// Using standard TouchableOpacity from React Native instead of gesture-handler
-// to avoid the GestureHandlerRootView requirement
 
 export function PlaceholdersAndVanishInput({
   placeholders,
@@ -192,7 +187,11 @@ export function PlaceholdersAndVanishInput({
   return (
     <View style={styles.container}>
       <View 
-      className='bg-white w-[100%] h-16 rounded-2xl overflow-hidden flex-row px-4 items-center relative border-2 border-gray-300'
+        style={[
+          styles.inputContainer, 
+          { backgroundColor: isDarkMode ? '#27272a' : '#ffffff' },
+          value ? styles.inputFilled : null
+        ]}
       >
         {/* Canvas for animation */}
         {animating && (
@@ -210,8 +209,24 @@ export function PlaceholdersAndVanishInput({
             </Group>
           </Canvas>
         )}
-
-        <Icon as={Search} className=' h-6 w-6 stroke-orange-500 stroke-2'/>
+        
+        {/* Text Input */}
+        <TextInput
+          ref={inputRef}
+          style={[
+            styles.input, 
+            { color: isDarkMode ? '#ffffff' : '#000000' },
+            animating ? styles.transparentText : null
+          ]}
+          value={value}
+          onChangeText={(text) => {
+            if (!animating) {
+              setValue(text);
+              onChange(text);
+            }
+          }}
+          onSubmitEditing={handleSubmitEditing}
+        />
         
         {/* Placeholder Animation */}
         {!value && (
@@ -225,12 +240,30 @@ export function PlaceholdersAndVanishInput({
               }
             ]}
           >
-            Search for '{placeholders[currentPlaceholder]}'
+            {placeholders[currentPlaceholder]}
           </Animated.Text>
         )}
         
+        {/* Submit Button */}
+        <TouchableOpacity
+          style={[
+            styles.submitButton,
+            { 
+              backgroundColor: isDarkMode ? '#18181b' : '#000000',
+              opacity: value && !animating ? 1 : 0.5 
+            }
+          ]}
+          disabled={!value || animating}
+          onPress={vanishAndSubmit}
+        >
+          <Svg width={24} height={24} viewBox="0 0 24 24" stroke={isDarkMode ? '#71717a' : '#d1d5db'} strokeWidth={2}>
+            <Line x1="5" y1="12" x2="19" y2="12" />
+            <Path d="M13 18l6 -6" />
+            <Path d="M13 6l6 6" />
+          </Svg>
+        </TouchableOpacity>
       </View>
-      {/* <StatusBar style={isDarkMode ? 'light' : 'dark'} /> */}
+      <StatusBar style={isDarkMode ? 'light' : 'dark'} />
     </View>
   );
 }
@@ -240,7 +273,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ffffff',
+    paddingBottom: 8,
   },
   inputContainer: {
     width: '100%',
@@ -278,9 +311,8 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     position: 'absolute',
-    left: 44,
-    fontSize: 18,
-    fontWeight: 'semibold',
+    left: 16,
+    fontSize: 16,
     zIndex: 0,
   },
   submitButton: {

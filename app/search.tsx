@@ -1,17 +1,89 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, TextInput, StyleSheet, Animated, Dimensions, AppState, SafeAreaView, Text, ActivityIndicator, FlatList } from 'react-native';
-import { PlaceholdersAndVanishInput2 } from '@/components/PlaceHolderAndVanish';
+import { View, TextInput, StyleSheet, Dimensions, AppState, SafeAreaView, Text, ActivityIndicator, FlatList, ScrollView, Pressable, TouchableOpacity } from 'react-native';
 import { router, Stack } from 'expo-router';
 import { Button, ButtonIcon, ButtonText } from '@/components/ui/button';
-import { ArrowLeft, Search } from 'lucide-react-native';
+import { ArrowLeft, ArrowUp, Search, ShoppingCart, Utensils } from 'lucide-react-native';
 import { useFetchProductsQuery } from '@/lib/query/useFetchProductsQuery';
 import { Icon } from '@/components/ui/icon';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import ProductCard from '@/components/ProductCard';
 import { ProductType } from '@/lib/type/productType';
+import { Badge, BadgeText } from '@/components/ui/badge';
+import { PlaceholdersAndVanishInput } from '@/components/mainSearchBar';
+import { useFetchCategoriesQuery } from '@/lib/query/useFetchCategoriesQuery';
+import { Image } from 'expo-image';
+import { blurhash } from '@/constants/blurHash';
+import HalfScreenModal from '@/components/modelComp';
+import Animated, {
+  useAnimatedRef,
+  useAnimatedStyle,
+  useScrollViewOffset,
+  useAnimatedScrollHandler,
+  withTiming,
+  useSharedValue,
+} from 'react-native-reanimated'
+
+const AnimatedFlatList = Animated.FlatList;
 
 export default function SearchInput() {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<null | any>(null);
+  const [search, setSearch] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const categories = useFetchCategoriesQuery();
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const flatListRef = useAnimatedRef<FlatList>();
+  const scrollY = useSharedValue(0);
+
+  // Create scroll handler to track scroll position
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+
+  // Animated style for the scroll-to-top button
+  const scrollToTopButtonStyle = useAnimatedStyle(() => {
+    return {
+      opacity: scrollY.value > 600 ? withTiming(1) : withTiming(0),
+      transform: [{ scale: scrollY.value > 600 ? withTiming(1) : withTiming(0.8) }],
+    };
+  });
+
+  // Function to scroll to top
+  const scrollToTop = () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
+
+  // Clear timeout when component unmounts
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Debounced search handler
+  const handleSearch = useCallback((text: string) => {
+    setSearch(text);
+
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Set new timeout to update searchQuery after 300ms
+    searchTimeoutRef.current = setTimeout(() => {
+      setSearchQuery(text);
+    }, 300);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setModalVisible(false);
+  }, []);
+
   const fetchProductsfunc = async ({
     pageParam = 1
   }): Promise<{
@@ -43,95 +115,230 @@ export default function SearchInput() {
       hasNextPage: data.pagination.hasNextPage,
     };
   };
+
   const fetchProducts = useInfiniteQuery({
     queryKey: ['storeProducts', searchQuery],
     queryFn: fetchProductsfunc,
-    // initial page = 1
     initialPageParam: 1,
     getNextPageParam: last => last.nextPage ?? undefined,
     getPreviousPageParam: first => first.prevPage ?? undefined,
   });
 
-
-  // Handle search submission
-  const handleSearch = (text: string) => {
-    setSearchQuery(text);
-  };
-
-  const loadMoreProducts = () => {
+  const loadMoreProducts = useCallback(() => {
     if (fetchProducts.hasNextPage && !fetchProducts.isFetchingNextPage) {
       fetchProducts.fetchNextPage();
     }
-  };
+  }, [fetchProducts]);
+
+  // Memoize the product card to prevent unnecessary re-renders
+  const MemoizedProductCard = React.memo(ProductCard);
+
+  // Memoize category list to prevent re-rendering
+  const CategoryList = useCallback(() => {
+    if (categories.isLoading) {
+      return (
+        <>
+          {Array(4).fill(0).map((_, i) => (
+            <View key={i} className='mr-4 rounded-full'>
+              <Image
+                source={{ uri: '' }}
+                style={{
+                  width: 80,
+                  height: 80,
+                  backgroundColor: '#EAEAEA',
+                  borderRadius: 40,
+                }}
+                contentFit="cover"
+                transition={1000}
+                placeholder={{ blurhash }}
+              />
+              <View className='mt-2 w-20'>
+                <Text className='line-clamp-1 text-xs text-[#333] text-center'>loading...</Text>
+              </View>
+            </View>
+          ))}
+        </>
+      );
+    }
+
+    if (categories.isError) {
+      return <Text>Something went wrong while fetching Categories...</Text>;
+    }
+
+    return (
+      <>
+        <Pressable onPress={() => router.push('/modal')} className='items-center mr-4'>
+          <View className='w-20 h-20 flex-row justify-center items-center rounded-full bg-[#EAEAEA] mb-3'>
+            <Icon as={Utensils} />
+          </View>
+          <Text className='mt-2 w-20 line-clamp-1 text-xs text-[#333] text-center'>View All</Text>
+        </Pressable>
+        {categories.data?.map((category: any) => (
+          <Pressable key={category.id} className='items-center mr-4'>
+            {!category.image ? (
+              <View className='w-20 h-20 flex-row justify-center items-center rounded-full bg-[#EAEAEA] mb-3'>
+                <Text className='text-3xl font-bold'>{category.name.slice(0, 1)}</Text>
+              </View>
+            ) : (
+              <Image
+                source={{ uri: category.image?.src }}
+                style={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: 40,
+                  backgroundColor: '#EAEAEA',
+                }}
+                cachePolicy={'disk'}
+                contentFit="cover"
+                placeholder={blurhash}
+              />
+            )}
+            <Text className='mt-2 w-20 line-clamp-1 text-xs text-[#333] text-center'>{category.name}</Text>
+          </Pressable>
+        ))}
+      </>
+    );
+  }, [categories.isLoading, categories.isError, categories.data]);
+
+  // Memoize header component to prevent re-renders
+  const ListHeader = useCallback(() => {
+    return (
+      <View className='my-4'>
+        <Text className='text-xl font-bold text-[#333] mb-4'>What's on your mind?</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className='mx-[-16px] px-4'>
+          <CategoryList />
+        </ScrollView>
+      </View>
+    );
+  }, [CategoryList]);
+
+  // Memoize empty component
+  const EmptyListComponent = useCallback(() => {
+    if (fetchProducts.isLoading || fetchProducts.isRefetching) {
+      return (
+        <View className="flex items-center justify-center py-10">
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      );
+    }
+
+    return (
+      <View className="flex items-center justify-center py-10">
+        <Icon as={Search} className="text-gray-300 size-10" />
+        <Text className="text-center mt-2 text-gray-500">No products found</Text>
+      </View>
+    );
+  }, [fetchProducts.isLoading, fetchProducts.isRefetching]);
+
+  // Memoize footer component
+  const FooterComponent = useCallback(() => {
+    if (fetchProducts.isFetchingNextPage) {
+      return (
+        <View className="py-4">
+          <ActivityIndicator size="small" color="#0000ff" />
+        </View>
+      );
+    }
+
+    if (fetchProducts.hasNextPage) {
+      return (
+        <Button className="mx-4 my-2" onPress={loadMoreProducts}>
+          <ButtonText>Load More</ButtonText>
+        </Button>
+      );
+    }
+
+    const allProducts = fetchProducts.data?.pages.flatMap(page => page.storeProducts) || [];
+    if (allProducts.length > 0) {
+      return <Text className="text-center py-4 text-gray-500">No more products</Text>;
+    }
+
+    return null;
+  }, [fetchProducts.isFetchingNextPage, fetchProducts.hasNextPage, fetchProducts.data?.pages, loadMoreProducts]);
 
   // Combine all pages of products into a single array
   const allProducts: ProductType[] = fetchProducts.data?.pages.flatMap(page => page.storeProducts) || [];
 
+  // Memoize renderItem function to prevent unnecessary re-renders
+  const renderItem = useCallback(({ item }: { item: ProductType }) => (
+    <MemoizedProductCard
+      item={item}
+      setModalVisible={setModalVisible}
+      setSelectedItem={setSelectedItem}
+    />
+  ), []);
   return (
-    <View>
-      <Stack.Screen
-        options={{
-          header: () => {
-            return (
-              <SafeAreaView className='w-full'>
-                <View className='flex-row'>
-                  <Button onPress={() => router.back()}>
-                    <ButtonIcon as={ArrowLeft}></ButtonIcon>
-                  </Button>
-                  <PlaceholdersAndVanishInput2
-                    placeholders={['Search for Pizza', 'Find something', 'Type here...']}
-                    onChange={handleSearch}
-                    onSubmit={() => console.log('Submitted')}
-                  />
-                </View>
-              </SafeAreaView>
-            )
-          },
-          headerBackButtonMenuEnabled: false,
-        }}>
-      </Stack.Screen>
-      <FlatList
-      className='h-[50rem]'
+    <>
+      <AnimatedFlatList
+        onScroll={scrollHandler}
+        ref={flatListRef}
+        className='h-screen mt-2'
         data={allProducts}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item: any) => item.id.toString()}
         showsVerticalScrollIndicator={false}
+        initialNumToRender={10}
+        keyboardShouldPersistTaps="handled"
+        windowSize={10}
+        style={{
+          paddingHorizontal: 12,
+          marginBottom: 0
+        }}
         onEndReached={loadMoreProducts}
         keyboardDismissMode='on-drag'
-        ListEmptyComponent={() => (
-          fetchProducts.isLoading || fetchProducts.isRefetching ? (
-            <View className="flex items-center justify-center py-10">
-              <ActivityIndicator size="large" color="#0000ff" />
-            </View>
-          ) : (<View className="flex items-center justify-center py-10">
-            <Icon as={Search} className="text-gray-300 size-10" />
-            <Text className="text-center mt-2 text-gray-500">No products found</Text>
-          </View>)
-        )}
-        ListFooterComponent={() => (
-          fetchProducts.isFetchingNextPage ? (
-              <View className="py-4">
-                  <ActivityIndicator size="small" color="#0000ff" />
-              </View>
-          ) : fetchProducts.hasNextPage  ? (
-              <Button className="mx-4 my-2" onPress={loadMoreProducts}>
-                  <ButtonText>Load More</ButtonText>
-              </Button>
-          ) : allProducts.length > 0 ? (
-              <Text className="text-center py-4 text-gray-500">No more products</Text>
-          ) : null
-      )}
-        renderItem={({ item }) => (
-          <ProductCard
-          id={item.id}
-          name={item.name}
-          price={item.price}
-          regular_price={item.regular_price}
-          sale_price={item.sale_price}
-          imageUrl={item.images[0].src}
-          stock_status={"yes"}
-          />
-        )}
+        ListHeaderComponent={
+          <>
+            <Stack.Screen
+              options={{
+                headerTitle: "Search for dishes",
+                headerBackButtonMenuEnabled: false,
+                headerBackTitle: 'Back',
+                headerTitleStyle: {
+                  fontSize: 14,
+                  fontWeight: 'thin',
+                },
+                headerRight: () => (
+                  <Icon as={ShoppingCart} />
+                )
+              }}
+            />
+            <PlaceholdersAndVanishInput
+              placeholders={['Search for Pizza', 'Find something', 'Type here...']}
+              onChange={handleSearch}
+              onSubmit={() => console.log('Submitted')}
+            />
+            <ListHeader />
+          </>
+        }
+        ListEmptyComponent={EmptyListComponent}
+        ListFooterComponent={FooterComponent}
+        renderItem={renderItem}
       />
-    </View>
+      <Animated.View
+        className='absolute bottom-12 right-5' style={scrollToTopButtonStyle}>
+        <TouchableOpacity
+          onPress={scrollToTop}
+          style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}
+          className='bg-orange-500 rounded-full p-3 border-2 border-orange-600'>
+          <Icon as={ArrowUp} className=' stroke-white' />
+        </TouchableOpacity>
+      </Animated.View>
+
+      {/* Performance optimized modal implementation */}
+      {modalVisible && (
+        <HalfScreenModal
+          isVisible={modalVisible}
+          onClose={closeModal}
+          title="Product Details"
+          data={selectedItem}
+          height={60}
+        >
+          {selectedItem && (
+            <View className='flex-row'>
+              <Text>{selectedItem.id}</Text>
+            </View>
+          )}
+        </HalfScreenModal>
+      )}
+    </>
   );
 }
