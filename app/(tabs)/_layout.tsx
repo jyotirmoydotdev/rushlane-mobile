@@ -64,7 +64,7 @@ export default function TabLayout() {
         },
         headerSearchBarOptions: {
           placeholder: 'Search',
-        }
+        },
       }}>
 
       <Tabs.Screen
@@ -73,78 +73,13 @@ export default function TabLayout() {
           title: 'Home',
           headerShadowVisible: false,
           headerTitle: () => null,
-          tabBarIcon: ({ color }) => <LucideHouse size={28} style={{ marginBottom: -3 }} color={color} />,
+          headerTitleStyle:{
+            fontSize: 5
+          },
+          tabBarIcon: ({ color }) => <LucideHouse size={18} style={{ marginBottom: -3 }} color={color} />,
           headerStyle: {
             backgroundColor: '#ffffff',
           },
-          header: () => (
-            <SafeAreaView style={{ backgroundColor: '#ffffff' }}>
-              {/* Top portion with existing header content */}
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                {/* Left side */}
-                <HStack className='gap-4 items-center pl-4 pt-4'>
-                  <Avatar size='md'>
-                    <AvatarFallbackText>Rushlane</AvatarFallbackText>
-                    <AvatarImage
-                      source={require("@/assets/images/icon.png")}
-                    />
-                  </Avatar>
-                  <Link href={'/location'} asChild>
-                    <Pressable>
-                      <View className='rounded-xl flex-row items-center gap-2 py-2 px-3 bg-white border-2 border-gray-300'>
-                        <Icon as={errorMsg ? NavigationOff : Navigation} className='fill-orange-500 stroke-orange-500 h-4 w-4' />
-                        <Text className='text-black text-lg font-bold text-center'>
-                          {errorMsg ? "Allow Location" : location ? `${location?.coords.latitude.toFixed(2)}, ${location?.coords.longitude.toFixed(2)}` : "Loading..."}
-                        </Text>
-                      </View>
-                    </Pressable>
-                  </Link>
-                </HStack>
-
-                {/* Right side */}
-                <HStack className='gap-0 pr-4 pt-4'>
-                  {/* <Link href={"/notifications"} asChild>
-                    <Pressable>
-                      <Box className='bg-black/0 w-12 h-12 flex items-center justify-center rounded-full aspect-square'>
-                        <Icon as={Bell} className='stroke-black' />
-                      </Box>
-                    </Pressable>
-                  </Link> */}
-                  <Link href={"/cart"} asChild>
-                    <Pressable>
-                      <Box className='bg-black/0 w-12 h-12 flex items-center justify-center rounded-full aspect-square'>
-                        <Icon as={ShoppingCart} className='stroke-black' />
-                      </Box>
-                    </Pressable>
-                  </Link>
-                </HStack>
-              </View>
-
-              {/* Search bar at bottom */}
-              <View className='flex-row justify-center items-center px-4 gap-2'>
-                <Link href={"/search"} className='flex-1 bg-white mb-2 pt-6 ' asChild>
-                  <Pressable>
-                    <PlaceholdersAndVanishInput
-                      placeholders={["Pizza", "Burger", "Ice Cream", "Sushi", "Pasta", "Tacos", "Steak", "Salad", "Sandwich", "Fried Chicken", "Noodles", "Dumplings", "Curry", "BBQ", "Seafood", "Ramen", "Donuts", "Waffles", "Pancakes", "Smoothies"]}
-                      onChange={() => console.log("Input changed:", text)}
-                      onSubmit={() => console.log("Input submitted:", text)}
-                    />
-                  </Pressable>
-                </Link>
-                <View className='felx-col items-center justify-center pt-4'>
-                  <View className='flex-col items-center justify-center rounded-2xl border-2 h-16 border-gray-300 '>
-                    <Text className='text-black italic text-base font-bold'>VEG</Text>
-                    <Switch
-                      size='sm'
-                      value={getVegStatus}
-                      onValueChange={setVegStatus}
-                      isDisabled={true}
-                    />
-                  </View>
-                </View>
-              </View>
-            </SafeAreaView>
-          ),
           headerBackgroundContainerStyle: {
             height: 160,
           },
@@ -159,7 +94,7 @@ export default function TabLayout() {
         name="orders"
         options={{
           title: 'Orders',
-          tabBarIcon: ({ color }) =>  <LucideReceiptText style={{ marginBottom: -3 }} size={24} color={color} />,
+          tabBarIcon: ({ color }) =>  <LucideReceiptText style={{ marginBottom: -3 }} size={18} color={color} />,
         }}
         listeners={{
           tabPress: () => {
@@ -171,7 +106,7 @@ export default function TabLayout() {
         name="account"
         options={{
           title: 'Account',
-          tabBarIcon: ({ color }) => <LucideUserRound style={{ marginBottom: -3 }} size={24} color={color} />,
+          tabBarIcon: ({ color }) => <LucideUserRound style={{ marginBottom: -3 }} size={18} color={color} />,
         }}
         listeners={{
           tabPress: () => {

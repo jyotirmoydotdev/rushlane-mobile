@@ -6,12 +6,13 @@ import { HStack } from '@/components/ui/hstack';
 import { VStack } from '@/components/ui/vstack';
 import { Text } from '@/components/ui/text';
 import { Button, ButtonText } from '@/components/ui/button';
+import ProductCard from '@/components/ProductCard';
 // import { useMutation } from '@tanstack/react-query';
 // import { createOrder } from '@/api/orders';
 
 export default function cart() {
-  const item = useCart((state:any) => state.items);
-  const resetCart = useCart((state:any)=>state.resetCart);
+  const item = useCart((state: any) => state.items);
+  const resetCart = useCart((state: any) => state.resetCart);
 
   // const createOrderMutation = useMutation({
   //   mutationFn: () => createOrder(
@@ -42,25 +43,23 @@ export default function cart() {
   }
   return (
     <FlatList
-    data={item}
-    contentContainerClassName='gap-2 max-w-[960px] w-full mx-auto'
-    renderItem={({ item }) => (
-      <HStack className='bg-white p-3'>
-        <VStack space='sm'>
-        <Text>{item.product.name}</Text>
-        <Text>{item.product.price}</Text>
-        </VStack>
-        <Text className='ml-auto'>{item.quantity}</Text>
-      </HStack>
-    )}
-    ListFooterComponent={() => (
-      <Box className='bg-white p-3'>
-        <Text className='text-xl py-4 font-semibold'>Total: ₹ {item.reduce((acc:any, curr:any) => acc + (curr.product.price * curr.quantity), 0)}</Text>
-        <Button onPress={()=>{}}>
-          <ButtonText>Checkout</ButtonText>
-        </Button>
-      </Box>
-    )}
+      data={item}
+      contentContainerClassName='gap-2 max-w-[960px] w-full mx-auto'
+      renderItem={({ item }) => (
+        <ProductCard
+          item={item.product}
+          setSelectedItem={() => { }}
+          setModalVisible={() => { }}
+        />
+      )}
+      ListFooterComponent={() => (
+        <Box className='bg-white p-3'>
+          <Text className='text-xl py-4 font-semibold'>Total: ₹ {item.reduce((acc: any, curr: any) => acc + (curr.product.price * curr.quantity), 0)}</Text>
+          <Button onPress={() => { }}>
+            <ButtonText>Checkout</ButtonText>
+          </Button>
+        </Box>
+      )}
     />
   )
 }

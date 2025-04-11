@@ -18,7 +18,6 @@ export interface StoreProductsPageResponse {
 
 // All Products
 export const useFetchProductsQuery = (
-    id: string,
     options?: {
         per_page?: number;
         search?: string;
@@ -36,7 +35,7 @@ export const useFetchProductsQuery = (
     const orderby = options?.orderby ?? undefined;
     const order = options?.order ?? undefined;
 
-    const baseCacheKey = `products_paged_${id}_${perPage}_${search || ''}_${category || ''}_${orderby || ''}_${order || ''}`;
+    const baseCacheKey = `products_paged_${perPage}_${search || ''}_${category || ''}_${orderby || ''}_${order || ''}`;
 
     useEffect(() => {
         const load = async () => {
@@ -44,7 +43,7 @@ export const useFetchProductsQuery = (
                 const raw = await AsyncStorage.getItem(baseCacheKey);
                 if (raw) {
                     const parsed = JSON.parse(raw);
-                    queryClient.setQueryData(['productsPaged', id, perPage, search, category, orderby, order], parsed);
+                    queryClient.setQueryData(['productsPaged', perPage, search, category, orderby, order], parsed);
                 }
             } catch {
                 /* ignore */
@@ -53,12 +52,16 @@ export const useFetchProductsQuery = (
             }
         };
         load();
-    }, [baseCacheKey, id, perPage, search, category, orderby, order, queryClient]);
+    }, [baseCacheKey, perPage, search, category, orderby, order, queryClient]);
 
-    const fetchPage = async ({ pageParam = 1 }) => {
-        if (isNaN(Number(id))) {
-            throw new Error('Invalid store ID');
-        }
+    const fetchPage = async ({ pageParam = 1 }):Promise<{
+        storeProducts: any[];
+        currentPage: number;
+        nextPage: number | null;
+        prevPage: number | null;
+        perPage: number;
+        hasNextPage: boolean;
+      }> => {
 
         const url = new URL(`/api/products`, window.location.origin);
         url.searchParams.append('page', pageParam.toString());
@@ -73,8 +76,17 @@ export const useFetchProductsQuery = (
             const err = await res.json();
             throw new Error(err.message || 'Failed to fetch store products');
         }
-        return res.json();
+        const data = await res.json();
+        return {
+            storeProducts: data.products || [],
+            currentPage: data.pagination.currentPage,
+            perPage: data.pagination.perPage,
+            nextPage: data.pagination.nextPage,
+            prevPage: data.pagination.prevPage,
+            hasNextPage: data.pagination.hasNextPage,
+        };
     };
+
     const {
         data,
         fetchNextPage,
@@ -84,32 +96,32 @@ export const useFetchProductsQuery = (
         isFetchingNextPage,
         isFetchingPreviousPage,
         ...rest
-      } = useInfiniteQuery<StoreProductsPageResponse>({
-        queryKey: ['productsPaged', id, perPage, search, category, orderby, order],
-        queryFn:   fetchPage,
+    } = useInfiniteQuery<StoreProductsPageResponse>({
+        queryKey: ['productsPaged', perPage, search, category, orderby, order],
+        queryFn: fetchPage,
         initialPageParam: 1,
         keepPreviousData: true,
-        getNextPageParam:   last => last.pagination.nextPage ?? undefined,
+        getNextPageParam: last => last.pagination.nextPage ?? undefined,
         getPreviousPageParam: first => first.pagination.prevPage ?? undefined,
-        enabled: initialDataLoaded && !!id,
+        enabled: initialDataLoaded,
         staleTime: 60_000,
-      });
-    
-      // Cache the full infinite data to AsyncStorage whenever it changes
-      useEffect(() => {
+    });
+
+    // Cache the full infinite data to AsyncStorage whenever it changes
+    useEffect(() => {
         if (data) {
-          AsyncStorage.setItem(baseCacheKey, JSON.stringify(data)).catch(() => {});
+            AsyncStorage.setItem(baseCacheKey, JSON.stringify(data)).catch(() => { });
         }
-      }, [data, baseCacheKey]);
-    
-      return {
+    }, [data, baseCacheKey]);
+
+    return {
         data,
         fetchNextPage,
         fetchPreviousPage,
-        hasNextPage:        hasNextPage  ?? false,
-        hasPreviousPage:    hasPreviousPage ?? false,
+        hasNextPage: hasNextPage ?? false,
+        hasPreviousPage: hasPreviousPage ?? false,
         isFetchingNextPage,
         isFetchingPreviousPage,
         ...rest,
-      };
+    };
 }

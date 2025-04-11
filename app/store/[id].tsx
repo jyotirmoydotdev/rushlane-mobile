@@ -212,23 +212,6 @@ export default function StorePage() {
         return null;
     }, [fetchStoreProducts.isFetchingNextPage, fetchStoreProducts.hasNextPage, fetchStoreProducts.data?.pages, loadMoreProducts]);
 
-    // Render loading state
-    // if (fetchStore.isLoading) { // || isLoading && !data
-    //     return <View className="flex-1 justify-center items-center"><ActivityIndicator size="large" /></View>;
-    // }
-
-    // Render error state
-    // if (fetchStore.isError || fetchStoreProducts.isError) {
-    //     return (
-    //         <View className="flex-1 justify-center items-center p-4">
-    //             <Text className="text-red-500 text-center">{fetchStore.isError ? fetchStore.error.message : (error instanceof Error ? error.message : 'An error occurred')}</Text>
-    //             <Button onPress={() => fetchStore.refetch()} className="mt-4">
-    //                 <ButtonText>Try Again</ButtonText>
-    //             </Button>
-    //         </View>
-    //     );
-    // }
-
     // Combine all pages of products into a single array
     const allProducts: ProductType[] = fetchStoreProducts.data?.pages.flatMap(page => page.storeProducts) || [];
 
@@ -241,153 +224,6 @@ export default function StorePage() {
     ), []);
 
     return (
-        // <View className='flex-1'>
-        //     <View className='flex-col gap-3 w-full p-2'>
-        //         <View className=' bg-gray-50 p-4 mx-2 rounded-2xl shadow-sm'>
-        //             <View className='flex-row gap-4 items-center'>
-        //                 <Image
-        //                     source={{
-        //                         uri: fetchStore.data?.logoUrl
-        //                     }}
-        //                     className=" bg-gray-200 "
-        //                     alt="image"
-        //                     style={{
-        //                         width: 112,
-        //                         height: 112,
-        //                         backgroundColor: `#c1c1c1`,
-        //                         objectFit: "cover",
-        //                         borderRadius: 999,
-        //                         borderColor: '#c1c1c1',
-        //                     }}
-        //                 />
-        //                 <View className='flex-col gap-1'>
-        //                     <Text className=' text-3xl w-[14rem] font-bold'>{he.decode(fetchStore.data?.name ?? "")}</Text>
-        //                     <Text className=' line-clamp-2 w-[12rem] text-base'>{he.decode(fetchStore.data?.address ?? "")}</Text>
-        //                     <View className='flex-row gap-2'>
-        //                         <View className=' w-[4rem] flex-row gap-2 px-2 py-1 rounded-md bg-green-600 items-center justify-center'>
-        //                             <Icon as={Star} className=' stroke-white' />
-        //                             <Text className=' text-lg text-white'>{fetchStore.data?.rating}</Text>
-        //                         </View>
-        //                         {
-        //                             (fetchStore.data?.email) && <Link href='/modal'>Email</Link>
-        //                         }
-        //                     </View>
-        //                 </View>
-        //             </View>
-        //         </View>
-        //         <View className='flex-col'>
-        //             <Input>
-        //                 <InputField
-        //                     placeholder='Search product'
-        //                     value={searchQuery}
-        //                     onChangeText={handleSearch}
-        //                     returnKeyType="search"
-        //                 />
-        //             </Input>
-        //             <View className='flex-row gap-2 mt-2'>
-        //                 <View className='flex-row gap-2 items-center justify-center rounded-2xl border-2 h-16 border-gray-300 px-3'>
-        //                     <Text className='text-black italic text-base font-bold'>VEG</Text>
-        //                     <Switch
-        //                         value={getVegStatus}
-        //                         onValueChange={setVegStatus}
-        //                         size='sm'
-        //                     />
-        //                 </View>
-        //                 <Button variant='outline' size='sm' className='rounded-lg'>
-        //                     <ButtonText>
-        //                         Rating 4.0+
-        //                     </ButtonText>
-        //                 </Button>
-        //             </View>
-        //         </View>
-        //         <View className="h-[30rem]">
-        //             <AnimatedFlatList
-        //                 onScroll={scrollHandler}
-        //                 ref={flatListRef}
-        //                 className='h-screen mt-2'
-        //                 data={allProducts}
-        //                 keyExtractor={(item: any) => item.id.toString()}
-        //                 showsVerticalScrollIndicator={false}
-        //                 initialNumToRender={10}
-        //                 keyboardShouldPersistTaps="handled"
-        //                 windowSize={10}
-        //                 style={{
-        //                     paddingHorizontal: 12,
-        //                     marginBottom: 0
-        //                 }}
-        //                 onEndReached={loadMoreProducts}
-        //                 keyboardDismissMode='on-drag'
-        //                 ListHeaderComponent={
-        //                     <>
-        //                         <PlaceholdersAndVanishInput
-        //                             placeholders={['Search for Pizza', 'Find something', 'Type here...']}
-        //                             onChange={handleSearch}
-        //                             onSubmit={() => console.log('Submitted')}
-        //                         />
-        //                     </>
-        //                 }
-        //                 ListEmptyComponent={EmptyListComponent}
-        //                 ListFooterComponent={FooterComponent}
-        //                 renderItem={renderItem}
-        //             />
-        //             <Animated.View
-        //                 className='absolute bottom-12 right-5' style={scrollToTopButtonStyle}>
-        //                 <TouchableOpacity
-        //                     onPress={scrollToTop}
-        //                     style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}
-        //                     className='bg-orange-500 rounded-full p-3 border-2 border-orange-600'>
-        //                     <Icon as={ArrowUp} className=' stroke-white' />
-        //                 </TouchableOpacity>
-        //             </Animated.View>
-
-        //             {/* Performance optimized modal implementation */}
-        //             {modalVisible && (
-        //                 <HalfScreenModal
-        //                     isVisible={modalVisible}
-        //                     onClose={closeModal}
-        //                     title="Product Details"
-        //                     data={selectedItem}
-        //                     height={60}
-        //                 >
-        //                     {selectedItem && (
-        //                         <FlatList
-        //                             data={selectedItem.attributes}
-        //                             keyExtractor={(item) => item.id.toString()}
-
-        //                             renderItem={({ item }) => (
-        //                                 <View className='flex-col justify-between mb-4 gap-4 border-b border-gray-300 pb-4'>
-        //                                     <View>
-        //                                         <Text className='text-2xl font-semibold'>{item.name}</Text>
-        //                                         <Text>{`Choose one out of this ${item.options.length} options`}</Text>
-        //                                     </View>
-        //                                     <View className='flex-col gap-2'>
-        //                                         {item.options.map((option: any, index: number) => (
-        //                                             <View key={index} className='flex flex-row gap-2'>
-        //                                                 <Checkbox size="md" value=''>
-        //                                                     <CheckboxIndicator>
-        //                                                         <CheckboxIcon as={CheckIcon} />
-        //                                                     </CheckboxIndicator>
-        //                                                 </Checkbox>
-        //                                                 <Text>{option}</Text>
-        //                                             </View>
-        //                                         ))}
-        //                                     </View>
-        //                                 </View>
-        //                             )}
-        //                             ListFooterComponent={() => (
-        //                                 <Button>
-        //                                     <ButtonText>
-        //                                         Add to Cart
-        //                                     </ButtonText>
-        //                                 </Button>
-        //                             )}
-        //                         />
-        //                     )}
-        //                 </HalfScreenModal>
-        //             )}
-        //         </View>
-        //     </View>
-        // </View>
         <>
             <View className=''>
                 <AnimatedFlatList
@@ -427,8 +263,8 @@ export default function StorePage() {
                                         }}
                                     />
                                     <View className='flex-col gap-1'>
-                                        <Text className=' text-3xl w-[14rem] font-bold'>{he.decode(fetchStore.data?.name ?? "Loding...")}</Text>
-                                        <Text className=' line-clamp-2 w-[12rem] text-base'>{he.decode(fetchStore.data?.address ?? "Loding...")}</Text>
+                                        <Text className=' text-3xl w-[14rem] font-bold'>{he.decode(fetchStore.data?.name ?? "Loading...")}</Text>
+                                        <Text className=' line-clamp-2 w-[12rem] text-base'>{he.decode(fetchStore.data?.address ?? "Loading...")}</Text>
                                         <View className='flex-row gap-2'>
                                             <View className='  flex-row gap-1 px-2 py-1 rounded-md bg-green-600 items-center justify-center'>
                                                 <Icon as={Star} className=' h-3 w-3 stroke-white' />

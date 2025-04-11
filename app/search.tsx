@@ -15,6 +15,8 @@ import HalfScreenModal from '@/components/modelComp';
 import Animated, { useAnimatedRef, useAnimatedStyle, useAnimatedScrollHandler, withTiming, useSharedValue } from 'react-native-reanimated'
 import { Checkbox, CheckboxIndicator, CheckboxIcon } from "@/components/ui/checkbox"
 import { CheckIcon } from "@/components/ui/icon"
+import { useFetchProductsQuery } from '@/lib/query/useFetchProductsQuery';
+import { Link } from 'expo-router';
 
 const AnimatedFlatList = Animated.FlatList;
 
@@ -120,6 +122,9 @@ export default function SearchInput() {
     getPreviousPageParam: first => first.prevPage ?? undefined,
   });
 
+  // XNOTE: keep the useQuery seperate
+  // const fetchProducts = useFetchProductsQuery()
+
   const loadMoreProducts = useCallback(() => {
     if (fetchProducts.hasNextPage && !fetchProducts.isFetchingNextPage) {
       fetchProducts.fetchNextPage();
@@ -187,7 +192,13 @@ export default function SearchInput() {
           <TouchableOpacity
             key={category.id}
             className={`items-center mr-4`}
-            onPress={() => setCategory(category.id)}
+            onPress={() => {
+              if (category.id === selectedCategory) {
+                setCategory(0)
+              } else {
+                setCategory(category.id)
+              }
+            }}
           >
             {!category.image ? (
               <View className='w-20 h-20 flex-row justify-center items-center rounded-full bg-[#EAEAEA] mb-3'>
@@ -237,7 +248,7 @@ export default function SearchInput() {
         </View>
       );
     }
-  
+
     return (
       <View className="flex items-center justify-center py-10">
         <Icon as={Search} className="text-gray-300 size-10" />
@@ -245,7 +256,7 @@ export default function SearchInput() {
       </View>
     );
   }, [fetchProducts.isLoading, fetchProducts.isRefetching]);
-  
+
 
   // Memoize footer component
   const FooterComponent = useCallback(() => {
@@ -315,7 +326,11 @@ export default function SearchInput() {
                   fontWeight: 'thin',
                 },
                 headerRight: () => (
-                  <Icon as={ShoppingCart} />
+                  <Link href={'/cart'} asChild>
+                    <TouchableOpacity>
+                      <Icon as={ShoppingCart} />
+                    </TouchableOpacity>
+                  </Link>
                 )
               }}
             />
@@ -331,12 +346,17 @@ export default function SearchInput() {
         ListFooterComponent={FooterComponent}
         renderItem={renderItem}
       />
-      <Animated.View className='absolute bottom-12 right-5' style={scrollToTopButtonStyle}>
+      <Animated.View
+        className="absolute bottom-7 left-0 right-0 flex-row justify-center"
+        style={scrollToTopButtonStyle}
+      >
         <TouchableOpacity
           onPress={scrollToTop}
-          style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}
-          className='bg-orange-500 rounded-full p-3 border-2 border-orange-600'>
-          <Icon as={ArrowUp} className=' stroke-white' />
+          className="bg-gray-900 rounded-xl p-3 shadow-lg border border-gray-800 flex-row items-center gap-1"
+          activeOpacity={0.8}
+        >
+          <Text className='text-white font-bold'>Back to top</Text>
+          <Icon as={ArrowUp} size='sm' className="stroke-white" />
         </TouchableOpacity>
       </Animated.View>
 

@@ -2,12 +2,24 @@ import { View, Text, TouchableOpacity } from 'react-native'
 import { StyleSheet } from 'react-native';
 import React from 'react'
 import { Icon } from './ui/icon';
-import { Bookmark, Share, ChefHat, Star, Triangle, Circle } from 'lucide-react-native';
+import { Bookmark, Share, ChefHat, Star, Triangle, Circle, CheckIcon } from 'lucide-react-native';
 import { blurhash } from '@/constants/blurHash';
 import { Button, ButtonText } from './ui/button';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import he from 'he';
+import { useCart } from '@/lib/state/cartState';
+import {
+  Actionsheet,
+  ActionsheetContent,
+  ActionsheetItem,
+  ActionsheetItemText,
+  ActionsheetDragIndicator,
+  ActionsheetDragIndicatorWrapper,
+  ActionsheetBackdrop,
+  ActionsheetSectionHeaderText,
+} from "@/components/ui/actionsheet"
+import { Checkbox, CheckboxIcon, CheckboxIndicator } from './ui/checkbox';
 
 type Props = {
   id: string | number,
@@ -23,13 +35,9 @@ type Props = {
 }
 
 interface ProductCardProps {
-
   item: any;
-
   setSelectedItem: React.Dispatch<React.SetStateAction<null>>;
-
   setModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ item, setSelectedItem, setModalVisible }) => {
@@ -38,9 +46,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, setSelectedItem, setMod
     setModalVisible(true);
   };
 
+  const addProduct = useCart((state: any) => state.addProduct);
+  const vendorId = useCart((state: any) => state.vendorId);
+
+  const [showActionsheet, setShowActionsheet] = React.useState(false)
+  const handleClose = () => setShowActionsheet(false)
+
   return (
-    <View className='flex-row justify-between w-full mb-4 gap-4 border-b border-gray-200 pb-4'>
-      <View className='w-1/2 flex-col gap-1.5 justify-start'>
+    <View className='flex-row items-center justify-between w-full mb-4 gap-2 border p-2 rounded-3xl bg-white border-gray-200'>
+      <View className='w-1/2 flex-col gap-1.5 justify-start p-2'>
         <Text className=' text-xl font-bold'>{item.name}</Text>
         {
           item.on_sale ? (
@@ -65,7 +79,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, setSelectedItem, setMod
           ))}
           <Text className='text-sm px-1 text-gray-500'>({item.rating_count})</Text>
         </View>
-        <TouchableOpacity onPress={()=>router.push(`/store/${item.store.vendor_id}`)} className='flex-row items-center gap-1'>
+        <TouchableOpacity onPress={() => router.push(`/store/${item.store.vendor_id}`)} className='flex-row items-center gap-1'>
           <Icon as={ChefHat} className='w-4 h-4 stroke-blue-500' />
           <Text className='text-base text-blue-500 font-medium'>{he.decode(item.store.vendor_shop_name)}</Text>
         </TouchableOpacity>
@@ -104,11 +118,48 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, setSelectedItem, setMod
         />
         <View className='absolute flex-row items-center justify-center bottom-4 w-full'>
           {item.attributes.length > 0 ? (
-            <Button className=' w-[8rem] rounded-full bg-orange-500/80 border border-orange-400' onPress={() => openModal(item)} >
-              <ButtonText className='text-xl text-white'>SELECT</ButtonText>
-            </Button>
+            <>
+              <Button className=' w-[8rem] rounded-full bg-orange-500/80 border border-orange-400' onPress={() => setShowActionsheet(true)} >
+                <ButtonText className='text-xl text-white'>SELECT</ButtonText>
+              </Button>
+              <Actionsheet isOpen={showActionsheet} onClose={handleClose}>
+                <ActionsheetBackdrop />
+                <ActionsheetContent>
+                  <ActionsheetDragIndicatorWrapper>
+                    <ActionsheetDragIndicator />
+                  </ActionsheetDragIndicatorWrapper>
+                  <ActionsheetSectionHeaderText>
+                    <Text className='text-xl font-semibold'>Select Attribute</Text>
+                  </ActionsheetSectionHeaderText>
+                  {item.attributes.map((attribute: any) => {
+                    return attribute.options.map((option: string, index: number) => (
+                      <ActionsheetItem key={index} className='flex flex-row gap-2'>
+                        <Checkbox size="md" value=''>
+                          <CheckboxIndicator>
+                            <CheckboxIcon as={CheckIcon} />
+                          </CheckboxIndicator>
+                        </Checkbox>
+                        <Text>{option}</Text>
+                      </ActionsheetItem>
+                    ));
+                  })}
+                  <ActionsheetItem>
+                    <Button>
+                      <ButtonText className='text-xl text-white'>ADD</ButtonText>
+                    </Button>
+                  </ActionsheetItem>
+                </ActionsheetContent>
+              </Actionsheet>
+            </>
           ) : (
-            <Button className=' w-[8rem] rounded-full bg-orange-500/80 border border-orange-400'>
+            <Button
+              onPress={async () => {
+                addProduct(item)
+                if (item.store.vendor_id === vendorId || vendorId === null) {
+                  router.push('/addmore')
+                }
+              }}
+              className=' w-[8rem] rounded-full bg-orange-500/80 border border-orange-400'>
               <ButtonText className='text-xl text-white'>ADD</ButtonText>
             </Button>
           )}

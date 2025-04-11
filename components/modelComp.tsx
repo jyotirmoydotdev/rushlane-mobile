@@ -3,6 +3,7 @@ import { View, Text, Pressable, Modal, StyleSheet, Animated, Dimensions } from '
 import { BlurView } from 'expo-blur';
 import { Icon } from './ui/icon';
 import { Cross } from 'lucide-react-native';
+import { Stack } from 'expo-router';
 
 interface HalfScreenModalProps {
   isVisible: boolean;

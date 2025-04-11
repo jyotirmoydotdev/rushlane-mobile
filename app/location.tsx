@@ -17,6 +17,7 @@ import {
 import { CheckIcon } from "@/components/ui/icon"
 
 import { View, Text, FlatList } from 'react-native';
+import ProductCartCard from '@/components/productCartCard';
 
 export default function Location() {
   const productItems: ProductType[] = [
@@ -683,74 +684,9 @@ export default function Location() {
         data={productItems}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <View className='flex-row justify-between mb-4 gap-4 border-b border-gray-300 pb-4'>
-            <View className='flex-col w-[12rem] gap-1.5 justify-start'>
-              {
-                item.categories.findIndex((cat) => cat.id == 355) == -1 ?
-                  <Icon as={Triangle} className=' h-4 w-4 fill-red-600 stroke-red-700' /> :
-                  <Icon as={Circle} className=' h-4 w-4 fill-green-600 stroke-green-700' />
-              }
-              <Text className=' text-xl font-bold'>{item.name}</Text>
-              {
-                item.on_sale ? (
-                  <View className='flex-row items-center gap-2'>
-                    <Text className='text-lg font-semibold'>₹ 200{item.sale_price}</Text>
-                    <Text className='text-base text-gray-500 line-through'>₹{item.regular_price}</Text>
-                  </View>
-                ) : (
-                  <Text className='text-lg font-semibold'>₹ {item.price}</Text>
-                )
-              }
-              <View className='flex-row gap-1 items-center'>
-                {Array.from({ length: 5 }, (_, index) => (
-                  <Icon
-                    key={index}
-                    as={Star}
-                    className={`w-3 h-3 ${index < Math.round(Number(item.average_rating))
-                      ? 'fill-yellow-400 stroke-yellow-500'
-                      : 'fill-gray-300 stroke-gray-400'
-                      }`}
-                  />
-                ))}
-                <Text className='text-sm px-1 text-gray-500'>({item.rating_count})</Text>
-              </View>
-              <View className='flex-row items-center gap-1'>
-                <Icon as={ChefHat} className='w-4 h-4 stroke-blue-500' />
-                <Text className='text-base text-blue-500 font-medium'>{item.store.vendor_shop_name}</Text>
-              </View>
-              <View className='flex-row gap-2 pt-2'>
-                <View className=' p-2 bg-gray-50 rounded-full border border-gray-200 outline'><Icon as={Bookmark} className='stroke-gray-500' /></View>
-                <View className=' p-2 bg-gray-50 rounded-full border border-gray-200 outline'><Icon as={Share} className='stroke-gray-500' /></View>
-              </View>
-            </View>
-            {/* Image */}
-            <View className='relative'>
-              <Image
-                alt='banner1'
-                source={{
-                  uri: item.images[0].src,
-                }}
-                placeholder={{ blurhash }}
-                contentFit="cover"
-                transition={1000}
-                style={{
-                  width: 160,
-                  height: 160,
-                  borderRadius: 24,
-                  marginRight: 16,
-                  borderColor: '#E5E7EB',
-                  borderWidth: 1,
-                }}
-              />
-              <View className='absolute flex-row items-center justify-center bottom-4 w-full'>
-                <Button className=' w-[8rem] rounded-full bg-orange-500/80 border border-orange-400' onPress={() => openModal(item)} >
-                  <ButtonText className='text-xl text-white'>
-                    {item.attributes.length > 0 ? 'SELECT' : 'ADD'}
-                  </ButtonText>
-                </Button>
-              </View>
-            </View>
-          </View>
+          <ProductCartCard
+          
+          />
         )}
       />
 

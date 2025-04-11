@@ -3,15 +3,18 @@ import { Platform, ScrollView, StyleSheet } from 'react-native';
 
 import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
+import { useFetchAllCategoriesQuery } from '@/lib/query/useFetchCategoriesQuery';
 
 export default function AllCategoriesPage() {
+  const fetchAllCategories = useFetchAllCategoriesQuery()
   return (
     <ScrollView style={styles.container}>
-      <View className='flex-row gap-5 flex-wrap justify-center px-2 pt-4'>
+      {/* <View className='flex-row gap-5 flex-wrap justify-center px-2 pt-4'>
       {Array.from({ length: 100 }).map((_, index) => (
         <View key={index} style={styles.circle} />
       ))}
-      </View>
+      </View> */}
+      <Text>{JSON.stringify(fetchAllCategories.isLoading?'Loading..,':fetchAllCategories.isError?'Something went wrong..':fetchAllCategories.data)}</Text>
     </ScrollView>
   );
 }
