@@ -46,8 +46,8 @@ function RootLayoutNav() {
             <Stack.Screen name="search" options={{
               headerShown: true,
             }} />
-            <Stack.Screen name="location" options={{
-              headerTitle: "Location",
+            <Stack.Screen name="locationmap" options={{
+              headerTitle: "Select Location",
               headerBackTitle: "Back"
             }} />
             <Stack.Screen name="notifications" options={{

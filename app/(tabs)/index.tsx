@@ -298,7 +298,7 @@ export default function Index() {
 
                 {/* Location Bar */}
                 <Animated.View style={locationAnimatedStyle} needsOffscreenAlphaCompositing={true} renderToHardwareTextureAndroid={true}>
-                  <Link href="/location" asChild>
+                  <Link href="/locationmap" asChild>
                     <Pressable
                       className="flex-row items-center pt-1 pb-6  overflow-hidden"
                       onPress={() => Haptics.selectionAsync()}
