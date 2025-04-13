@@ -45,6 +45,7 @@ import { PlaceholdersAndVanishInput } from '@/components/PlaceHolderAndVanish';
 import he from 'he'
 import { useLocationState } from '@/lib/state/locationState';
 import { useFetchProductsQuery } from '@/lib/query/useFetchProductsQuery';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface RestaurantCardProps {
   id: number;
@@ -603,12 +604,13 @@ export default function Index() {
     getCurrentLocation();
   }, []);
 
+  const insets = useSafeAreaInsets();
   return (
     <>
       <Tabs.Screen
         options={{
           header: () => (
-            <SafeAreaView className="bg-white">
+            <View className="bg-white" style={{ paddingTop: insets.top, backgroundColor: 'white' }}>
               <Animated.View className=" px-4 pt-2 pb-2" style={headerContainerStyle}>
                 {/* Location Bar */}
                 <Animated.View style={locationAnimatedStyle}>
@@ -679,7 +681,7 @@ export default function Index() {
                 </Animated.View>
 
               </Animated.View>
-            </SafeAreaView>
+            </View>
           ),
           headerShadowVisible: false,
         }}
@@ -773,11 +775,10 @@ export default function Index() {
             </>
           )}
         </ScrollView>
-
-        {/* Food Categories */}
+{/* 
         <View className="pt-4 bg-white mt-2">
           <Text className="text-lg font-bold  mb-3 px-4">Trending food</Text>
-        </View>
+        </View> */}
 
         {/* Trending Food List */}
         {/* <ScrollView
