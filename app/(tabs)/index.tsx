@@ -2,15 +2,19 @@ import React, { useEffect, useState, useRef } from 'react';
 import { View, SafeAreaView, Pressable, TouchableOpacity, FlatList } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Icon } from '@/components/ui/icon';
+import { type StateCreator } from 'zustand'
 import {
+  ArrowRight,
   ArrowUp,
   ChevronDown,
   ChevronRight,
   Filter,
   Home,
+  IndianRupee,
   LocateIcon,
   MapPin,
   Navigation,
+  Percent,
   Pin,
   Search,
   Star,
@@ -39,6 +43,8 @@ import { blurhash } from '@/constants/blurHash';
 import { PlaceholdersAndVanishInput } from '@/components/PlaceHolderAndVanish';
 
 import he from 'he'
+import { useLocationState } from '@/lib/state/locationState';
+import { useFetchProductsQuery } from '@/lib/query/useFetchProductsQuery';
 
 interface RestaurantCardProps {
   id: number;
@@ -66,7 +72,7 @@ const RestaurantCard = ({
   discount,
 }: RestaurantCardProps) => {
   return (
-    <View className="bg-white rounded-xl shadow-sm border border-gray-100">
+    <View className="bg-white rounded-3xl shadow-sm border border-gray-100">
       {/* Restaurant Image */}
       <View className="relative">
         <Image
@@ -74,8 +80,8 @@ const RestaurantCard = ({
           style={{
             height: 180,
             width: '100%',
-            borderTopLeftRadius: 12,
-            borderTopRightRadius: 12
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20
           }}
           className="rounded-t-xl"
           contentFit="cover"
@@ -163,7 +169,6 @@ export default function Index() {
   const categoriesQuery = useFetchCategoriesQuery();
   const storesQuery = useFetchStoresQuery();
 
-  // Animation for floating scroll to top button
   const buttonStyle = useAnimatedStyle(() => {
     return {
       opacity: withTiming(scrollHandler.value > 300 ? 1 : 0),
@@ -171,17 +176,27 @@ export default function Index() {
     }
   });
 
+  const BANNER_HEIGHT = 190;
+  const HEADER_STICKY_THRESHOLD = 50;
 
-  const headerAnimatedStyle = useAnimatedStyle(() => {
+  const headerContainerStyle = useAnimatedStyle(() => {
+    const isSticky = scrollHandler.value > HEADER_STICKY_THRESHOLD;
     return {
-      height: scrollHandler.value > 50 ? withTiming(70, { duration: 300 }) : withSpring(320),
-    }
-  })
-  const bannerAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      height: scrollHandler.value > 50 ? withTiming(0, { duration: 300 }) : withSpring(320),
-    }
-  })
+      backgroundColor: 'white',
+      // shadowColor: isSticky ? '#000' : 'transparent',
+      // shadowOpacity: withTiming(isSticky ? 0.1 : 0, { duration: 200 }),
+      // shadowRadius: withTiming(isSticky ? 3 : 0, { duration: 200 }),
+      // shadowOffset: {
+      //   width: 0,
+      //   height: withTiming(isSticky ? 2 : 0, { duration: 200 }),
+      // },
+      // elevation: withTiming(isSticky ? 4 : 0, { duration: 200 }),
+      // borderBottomWidth: withTiming(isSticky ? 1 : 0, { duration: 200 }),
+      // borderBottomColor: 'rgba(0,0,0,0.05)',
+    };
+  });
+
+
   const locationAnimatedStyle = useAnimatedStyle(() => {
     const collapseHeight = Math.min(scrollHandler.value, 50);
     return {
@@ -193,48 +208,11 @@ export default function Index() {
         },
       ],
       height: scrollHandler.value > 50 ? withTiming(50 - collapseHeight, { duration: 300 }) : withSpring(50 - collapseHeight),
-      opacity: scrollHandler.value > 50
-        ? withTiming(1 - collapseHeight / 50, { duration: 300 })
-        : withSpring(1 - collapseHeight / 50),
+      opacity: withTiming(scrollHandler.value > 50 ? 0 : 1, { duration: 300 }),
     };
   });
 
-
-  // XNOTE: Calculate the Scroll Value height instead of using '>'
-  // const locationAnimatedStyle = useAnimatedStyle(() => {
-  //   const collapseHeight = Math.min(scrollHandler.value, 50);
-  //   const opacity = scrollHandler.value > 50
-  //     ? withTiming(1 - collapseHeight / 50, { duration: 300 })
-  //     : withSpring(1 - collapseHeight / 50);
-  //   const height = scrollHandler.value > 50
-  //     ? withTiming(50 - collapseHeight, { duration: 300 })
-  //     : withSpring(50 - collapseHeight);
-  //   const scale = scrollHandler.value > 50
-  //     ? withTiming(1 - collapseHeight / 50, { duration: 300 })
-  //     : withSpring(1 - collapseHeight / 50);
-
-  //   return {
-  //     opacity,
-  //     height,
-  //     transform: [{ scale }],
-  //   };
-  // });
-
-  // Get user location
-  useEffect(() => {
-    async function getCurrentLocation() {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
-    }
-
-    getCurrentLocation();
-  }, []);
+  const setLocationState = useLocationState((state: any) => state.setLocation);
 
   // Handle scroll to top
   const scrollTop = () => {
@@ -250,53 +228,390 @@ export default function Index() {
   const stores = storesQuery.data
 
   // Mock data for special offers
-  const specialOffers: {
-    id: number;
-    title: string;
-    description: string;
-    image: any;
-    color: [string, string];
-  }[] = [
-      {
-        id: 1,
-        title: '50% OFF up to ₹100',
-        description: 'Use code WELCOME50',
-        image: require('@/assets/images/banner1.jpg'),
-        color: ['rgba(252,128,25,0.8)', 'rgba(252,128,25,0.95)']
-      },
-      {
-        id: 2,
-        title: 'Free Delivery',
-        description: 'On orders above ₹199',
-        image: require('@/assets/images/banner2.jpg'),
-        color: ['rgba(226,55,68,0.8)', 'rgba(226,55,68,0.95)']
-      },
-    ];
+  const specialOffers = [
+    {
+      "id": 28279,
+      "code": "river15",
+      "amount": "15.00",
+      "status": "publish",
+      "date_created": "2025-03-15T13:47:51",
+      "date_created_gmt": "2025-03-15T08:17:51",
+      "date_modified": "2025-04-05T13:18:40",
+      "date_modified_gmt": "2025-04-05T07:48:40",
+      "discount_type": "percent",
+      "description": "Get 15% OFF On all items excluding Pizzas.",
+      "date_expires": "2025-04-06T00:00:00",
+      "date_expires_gmt": "2025-04-05T18:30:00",
+      "usage_count": 0,
+      "individual_use": false,
+      "product_ids": [],
+      "excluded_product_ids": [],
+      "usage_limit": null,
+      "usage_limit_per_user": null,
+      "limit_usage_to_x_items": null,
+      "free_shipping": false,
+      "product_categories": [
+        169
+      ],
+      "excluded_product_categories": [
+        124
+      ],
+      "exclude_sale_items": false,
+      "minimum_amount": "0.00",
+      "maximum_amount": "0.00",
+      "email_restrictions": [],
+      "used_by": [],
+      "meta_data": [
+        {
+          "id": 844776,
+          "key": "_wcfm_coupon_author",
+          "value": "1"
+        },
+        {
+          "id": 844789,
+          "key": "show_on_store",
+          "value": "yes"
+        },
+        {
+          "id": 844790,
+          "key": "sc_is_visible_storewide",
+          "value": "yes"
+        },
+        {
+          "id": 849535,
+          "key": "os_meta",
+          "value": []
+        }
+      ],
+      "_links": {
+        "self": [
+          {
+            "href": "https://rushlane.net/wp-json/wc/v3/coupons/28279",
+            "targetHints": {
+              "allow": [
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE"
+              ]
+            }
+          }
+        ],
+        "collection": [
+          {
+            "href": "https://rushlane.net/wp-json/wc/v3/coupons"
+          }
+        ]
+      }
+    },
+    {
+      "id": 27542,
+      "code": "blue10",
+      "amount": "10.00",
+      "status": "publish",
+      "date_created": "2025-03-06T17:24:14",
+      "date_created_gmt": "2025-03-06T11:54:14",
+      "date_modified": "2025-03-06T17:55:30",
+      "date_modified_gmt": "2025-03-06T12:25:30",
+      "discount_type": "percent",
+      "description": "Get a flat 10% off on orders above ₹1000 only on Blue Van.",
+      "date_expires": "2025-12-31T00:00:00",
+      "date_expires_gmt": "2025-12-30T18:30:00",
+      "usage_count": 0,
+      "individual_use": false,
+      "product_ids": [],
+      "excluded_product_ids": [],
+      "usage_limit": null,
+      "usage_limit_per_user": 2,
+      "limit_usage_to_x_items": null,
+      "free_shipping": false,
+      "product_categories": [
+        489
+      ],
+      "excluded_product_categories": [],
+      "exclude_sale_items": false,
+      "minimum_amount": "1000.00",
+      "maximum_amount": "0.00",
+      "email_restrictions": [],
+      "used_by": [],
+      "meta_data": [
+        {
+          "id": 814298,
+          "key": "_wcfm_coupon_author",
+          "value": "1"
+        },
+        {
+          "id": 814310,
+          "key": "show_on_store",
+          "value": "yes"
+        },
+        {
+          "id": 814311,
+          "key": "sc_is_visible_storewide",
+          "value": "yes"
+        }
+      ],
+      "_links": {
+        "self": [
+          {
+            "href": "https://rushlane.net/wp-json/wc/v3/coupons/27542",
+            "targetHints": {
+              "allow": [
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE"
+              ]
+            }
+          }
+        ],
+        "collection": [
+          {
+            "href": "https://rushlane.net/wp-json/wc/v3/coupons"
+          }
+        ]
+      }
+    },
+    {
+      "id": 27530,
+      "code": "garden10",
+      "amount": "10.00",
+      "status": "publish",
+      "date_created": "2025-03-06T16:56:53",
+      "date_created_gmt": "2025-03-06T11:26:53",
+      "date_modified": "2025-03-29T11:25:40",
+      "date_modified_gmt": "2025-03-29T05:55:40",
+      "discount_type": "fixed_cart",
+      "description": "Get Flat ₹10 OFF On Every Order only on The Garden Eatery.",
+      "date_expires": "2025-03-31T00:00:00",
+      "date_expires_gmt": "2025-03-30T18:30:00",
+      "usage_count": 2,
+      "individual_use": false,
+      "product_ids": [
+        20516,
+        20515
+      ],
+      "excluded_product_ids": [],
+      "usage_limit": null,
+      "usage_limit_per_user": null,
+      "limit_usage_to_x_items": null,
+      "free_shipping": false,
+      "product_categories": [
+        547
+      ],
+      "excluded_product_categories": [],
+      "exclude_sale_items": false,
+      "minimum_amount": "0.00",
+      "maximum_amount": "0.00",
+      "email_restrictions": [],
+      "used_by": [
+        "nisanchiarengh65@gmail.com",
+        "nisanchiarengh65@gmail.com"
+      ],
+      "meta_data": [
+        {
+          "id": 814270,
+          "key": "_wcfm_coupon_author",
+          "value": "1"
+        },
+        {
+          "id": 814281,
+          "key": "show_on_store",
+          "value": "yes"
+        },
+        {
+          "id": 814282,
+          "key": "sc_is_visible_storewide",
+          "value": "yes"
+        },
+        {
+          "id": 863497,
+          "key": "os_meta",
+          "value": []
+        }
+      ],
+      "_links": {
+        "self": [
+          {
+            "href": "https://rushlane.net/wp-json/wc/v3/coupons/27530",
+            "targetHints": {
+              "allow": [
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE"
+              ]
+            }
+          }
+        ],
+        "collection": [
+          {
+            "href": "https://rushlane.net/wp-json/wc/v3/coupons"
+          }
+        ]
+      }
+    },
+    {
+      "id": 18935,
+      "code": "tabol10",
+      "amount": "10.00",
+      "status": "publish",
+      "date_created": "2024-10-11T16:00:50",
+      "date_created_gmt": "2024-10-11T10:30:50",
+      "date_modified": "2025-03-29T11:27:29",
+      "date_modified_gmt": "2025-03-29T05:57:29",
+      "discount_type": "fixed_cart",
+      "description": "Get Flat ₹10 OFF On Every Order.",
+      "date_expires": "2025-03-31T00:00:00",
+      "date_expires_gmt": "2025-03-30T18:30:00",
+      "usage_count": 34,
+      "individual_use": false,
+      "product_ids": [
+        7453
+      ],
+      "excluded_product_ids": [],
+      "usage_limit": null,
+      "usage_limit_per_user": null,
+      "limit_usage_to_x_items": null,
+      "free_shipping": false,
+      "product_categories": [
+        196
+      ],
+      "excluded_product_categories": [],
+      "exclude_sale_items": false,
+      "minimum_amount": "0.00",
+      "maximum_amount": "0.00",
+      "email_restrictions": [],
+      "used_by": [
+        "678",
+        "allanamarak145@gmail.com",
+        "arenghasherah@gmail.com",
+        "678",
+        "85",
+        "ripamchi18@gmail.com",
+        "archiramarak123@gmail.com",
+        "jasinsangma8@gmail.com",
+        "agaamar@gmail.com",
+        "791",
+        "678",
+        "678",
+        "514",
+        "archiramarak123@gmail.com",
+        "officialmlbbdiasmart@gmail.com",
+        "630",
+        "737",
+        "678",
+        "293",
+        "agaamar@gmail.com",
+        "archiramarak123@gmail.com",
+        "678",
+        "822",
+        "chinnusangma42@gmail.com",
+        "678",
+        "834",
+        "chissanomrong@gmail.com",
+        "priya.pongener@gmail.com",
+        "849",
+        "740",
+        "742",
+        "849",
+        "cheangchimarak293@gmail.com",
+        "bennethmarpna855@gmail.com"
+      ],
+      "meta_data": [
+        {
+          "id": 608131,
+          "key": "wpccl_public",
+          "value": ""
+        },
+        {
+          "id": 814268,
+          "key": "show_on_store",
+          "value": "yes"
+        },
+        {
+          "id": 814269,
+          "key": "sc_is_visible_storewide",
+          "value": "yes"
+        },
+        {
+          "id": 864199,
+          "key": "os_meta",
+          "value": []
+        }
+      ],
+      "_links": {
+        "self": [
+          {
+            "href": "https://rushlane.net/wp-json/wc/v3/coupons/18935",
+            "targetHints": {
+              "allow": [
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE"
+              ]
+            }
+          }
+        ],
+        "collection": [
+          {
+            "href": "https://rushlane.net/wp-json/wc/v3/coupons"
+          }
+        ]
+      }
+    }
+  ]
 
-  const collections = [
+  const services = [
     {
       id: 1,
       title: 'RushMart',
-      image: require('@/assets/images/rushmart.webp'),
+      image: require('@/assets/images/rushmart.jpg'),
       description: 'Instant grocery delivery service',
     },
     {
       id: 2,
-      title: 'Logistic',
-      image: require('@/assets/images/rushmart.webp'),
+      title: 'Logistics',
+      image: require('@/assets/images/logistics.jpg'),
       description: 'Pickup and drop service',
     },
   ];
+
+  // const fetchProducts = useFetchProductsQuery()
+
+  useEffect(() => {
+    async function getCurrentLocation() {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission to access location was denied');
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+      setLocationState({
+        longitude: location.coords.longitude,
+        latitude: location.coords.latitude,
+      });
+    }
+
+    getCurrentLocation();
+  }, []);
 
   return (
     <>
       <Tabs.Screen
         options={{
           header: () => (
-            <SafeAreaView className="bg-transparent">
-              <Animated.View className=" px-4 pt-2">
+            <SafeAreaView className="bg-white">
+              <Animated.View className=" px-4 pt-2 pb-2" style={headerContainerStyle}>
                 {/* Location Bar */}
-                <Animated.View style={locationAnimatedStyle} needsOffscreenAlphaCompositing={true} renderToHardwareTextureAndroid={true}>
+                <Animated.View style={locationAnimatedStyle}>
                   <Link href="/location" asChild>
                     <Pressable
                       className="flex-row items-center pt-1 pb-6  overflow-hidden"
@@ -366,6 +681,7 @@ export default function Index() {
               </Animated.View>
             </SafeAreaView>
           ),
+          headerShadowVisible: false,
         }}
       />
 
@@ -373,141 +689,206 @@ export default function Index() {
         ref={scrollRef}
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
+        stickyHeaderIndices={[6]}
         className="bg-white"
-        needsOffscreenAlphaCompositing={true}
-        renderToHardwareTextureAndroid={true}
       >
-
-        {/* <Animated.View className='px-4'>
+        <Animated.View className='px-4 bg-white rounded-lg' >
           <Image
-            source={require('@/assets/images/banner1.jpg')}
+            source={require('@/assets/images/food.gif')}
             style={[{
               width: '100%',
-              height: 190,
-              marginTop: 10,
+              height: 200,
               borderRadius: 12,
             }]}
+            contentFit="cover"
+            contentPosition={'center'}
+            placeholder={{ blurhash }}
+            transition={200}
+            renderToHardwareTextureAndroid={true}
           />
-        </Animated.View> */}
+        </Animated.View>
 
         {/* Food Categories */}
-        <View className="py-4 bg-white mt-2">
+        <View className="pt-4 bg-white mt-2">
           <Text className="text-lg font-bold  mb-3 px-4">What's on your mind?</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            className="px-2"
-            decelerationRate="fast"
-          >
-            {categoriesQuery.isLoading ? (
-              Array(8).fill(0).map((_, i) => (
-                <View key={i} className="mr-5 items-center">
-                  <View
-                    className="w-[80px] h-[80px] rounded-full bg-gray-200 animate-pulse-light"
-                  />
-                  <View className="mt-2 w-20 h-3 bg-gray-200 rounded animate-pulse-light"></View>
-                </View>
-              ))
-            ) : categoriesQuery.isError ? (
-              <Text className="px-4">Something went wrong...</Text>
-            ) : (
-              <>
-                {categoriesQuery.data?.map((category: any, index: number) => (
-                  <Pressable
-                    key={category.id}
-                    className={`mr-5 items-center ${activeCategory === category.id ? 'opacity-100' : 'opacity-90'
-                      }`}
-                    onPress={() => {
-                      Haptics.selectionAsync();
-                      setActiveCategory(category.id);
-                    }}
-                  >
-                    <Animated.View
-                      entering={FadeIn.delay(50 * index).duration(400)}
-                      className="relative"
-                    >
-                      <Image
-                        source={{ uri: category.image?.src || 'https://images.unsplash.com/photo-1625398407937-2ee2bce3ff68' }}
-                        style={{
-                          width: 80,
-                          height: 80,
-                          borderRadius: 40,
-                        }}
-                        contentFit="cover"
-                        placeholder={{ blurhash }}
-                        transition={300}
-                        className="shadow-sm border border-gray-100"
-                      />
-                      {activeCategory === category.id && (
-                        <View className="absolute -bottom-1 left-0 right-0 flex items-center">
-                          <View className="w-2 h-2 rounded-full bg-foodapp-primary"></View>
-                        </View>
-                      )}
-                    </Animated.View>
-                    <Text className="mt-2 text-sm text-center font-medium ">
-                      {category.name}
-                    </Text>
-                  </Pressable>
-                ))}
-              </>
-            )}
-          </ScrollView>
         </View>
+
+        {/* Food Categories List */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="px-2 pb-2 bg-white"
+          decelerationRate="fast"
+        >
+          {categoriesQuery.isLoading ? (
+            Array(8).fill(0).map((_, i) => (
+              <View key={i} className="mr-5 items-center">
+                <View
+                  className="w-[80px] h-[80px] rounded-full bg-gray-200 animate-pulse-light"
+                />
+                <View className="mt-2 w-20 h-3 bg-gray-200 rounded animate-pulse-light"></View>
+              </View>
+            ))
+          ) : categoriesQuery.isError ? (
+            <Text className="px-4">Something went wrong...</Text>
+          ) : (
+            <>
+              {categoriesQuery.data?.map((category: any, index: number) => (
+                <Pressable
+                  key={category.id}
+                  className={`mr-5 items-center ${activeCategory === category.id ? 'opacity-100' : 'opacity-90'
+                    }`}
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    setActiveCategory(category.id);
+                  }}
+                >
+                  <Animated.View
+                    entering={FadeIn.delay(50 * index).duration(400)}
+                    className="relative"
+                  >
+                    <Image
+                      source={{ uri: category.image?.src || 'https://images.unsplash.com/photo-1625398407937-2ee2bce3ff68' }}
+                      style={{
+                        width: 80,
+                        height: 80,
+                        borderRadius: 40,
+                      }}
+                      contentFit="cover"
+                      placeholder={{ blurhash }}
+                      transition={300}
+                      className="shadow-sm border border-gray-100"
+                    />
+                    {activeCategory === category.id && (
+                      <View className="absolute -bottom-1 left-0 right-0 flex items-center">
+                        <View className="w-2 h-2 rounded-full bg-foodapp-primary"></View>
+                      </View>
+                    )}
+                  </Animated.View>
+                  <Text className="mt-2 text-sm text-center font-medium ">
+                    {category.name}
+                  </Text>
+                </Pressable>
+              ))}
+            </>
+          )}
+        </ScrollView>
+
+        {/* Food Categories */}
+        <View className="pt-4 bg-white mt-2">
+          <Text className="text-lg font-bold  mb-3 px-4">Trending food</Text>
+        </View>
+
+        {/* Trending Food List */}
+        {/* <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="px-2 pb-2 bg-white"
+          decelerationRate="fast"
+        >
+          {fetchProducts.isLoading ? (
+            Array(8).fill(0).map((_, i) => (
+              <View key={i} className="mr-5 items-center">
+                <View
+                  className="w-[80px] h-[80px] rounded-full bg-gray-200 animate-pulse-light"
+                />
+                <View className="mt-2 w-20 h-3 bg-gray-200 rounded animate-pulse-light"></View>
+              </View>
+            ))
+          ) : fetchProducts.isError ? (
+            <Text className="px-4">Something went wrong...</Text>
+          ) : (
+            <>
+              {fetchProducts.data?.map((product: any, index: number) => (
+                <Pressable
+                  key={product.id}
+                  className={`mr-5 items-center`}
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    router.push(`/`);
+                  }}
+                >
+                  <Animated.View
+                    entering={FadeIn.delay(50 * index).duration(400)}
+                    className="relative"
+                  >
+                    <Image
+                      source={{ uri: product.images[0]?.src || 'https://images.unsplash.com/photo-1625398407937-2ee2bce3ff68' }}
+                      style={{
+                        width: 80,
+                        height: 80,
+                        borderRadius: 40,
+                      }}
+                      contentFit="cover"
+                      placeholder={{ blurhash }}
+                      transition={300}
+                      className="shadow-sm border border-gray-100"
+                    />
+                  </Animated.View>
+                  <Text className="mt-2 text-sm text-center font-medium ">
+                    {product.name}
+                  </Text>
+                </Pressable>
+              ))}
+            </>
+          )}
+        </ScrollView> */}
 
         {/* Special Offers Carousel */}
         <View className="py-4 bg-white mt-2">
-          <Text className="text-lg font-bold  mb-3 px-4">Special Offers</Text>
+          <Text className="text-lg font-bold mb-3 px-4">Special Offers</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             className="px-2"
-            contentContainerStyle={{ paddingHorizontal: 2 }}
             decelerationRate="fast"
-            snapToInterval={290}
-            snapToAlignment="center"
           >
-            {specialOffers.map((offer, index) => (
+            {specialOffers.map((item, index) => (
               <Animated.View
-                key={offer.id}
+                key={item.id}
                 entering={SlideInRight.delay(100 * index).duration(300)}
-                className="mr-4 overflow-hidden"
+                className="mr-4"
               >
                 <Pressable
                   className="rounded-xl overflow-hidden shadow-sm"
                   onPress={() => Haptics.selectionAsync()}
                 >
-                  <Image
-                    source={offer.image}
+                  <View
+                    className='bg-white border border-dashed border-gray-500'
                     style={{
-                      width: 280,
-                      height: 140,
-                    }}
-                    placeholder={{ blurhash }}
-                    contentFit="cover"
-                    transition={200}
-                  />
-                  <LinearGradient
-                    colors={offer.color}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={{
-                      position: 'absolute',
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      height: 70,
-                      borderBottomLeftRadius: 12,
-                      borderBottomRightRadius: 12,
+                      height: 'auto',
+                      width: 150,
+                      borderRadius: 12,
                       padding: 12,
-                      justifyContent: 'flex-end',
+                      justifyContent: 'center',
+                      alignItems: 'center',
                     }}
                   >
-                    <Text className="text-white font-bold text-lg">{offer.title}</Text>
-                    <Text className="text-white text-sm">{offer.description}</Text>
-                  </LinearGradient>
+                    <View className='p-4 rounded-full bg-gray-100 mb-2'>
+                      {
+                        item.discount_type === 'percent' ? (
+                          <Icon as={Percent} />
+                        ) : (
+                          <Icon as={IndianRupee} />
+                        )
+                      }
+                    </View>
+                    <Text className=" font-semibold text-base text-center line-clamp-2">
+                      {item.description}
+                    </Text>
+                    <View className='p-2 rounded-lg border border-dotted border-gray-500 w-full bg-gray-100 mt-2'>
+                      <Text className="text-sm font-bold text-center mt-1">
+                        {item.code}
+                      </Text>
+                    </View>
+                  </View>
                 </Pressable>
               </Animated.View>
             ))}
+            <TouchableOpacity className='flex-1 items-center justify-center w-[120px] border border-dashed border-gray-500 rounded-xl mr-6'>
+              <Icon as={ArrowRight} />
+              <Text>View all</Text>
+            </TouchableOpacity>
           </ScrollView>
         </View>
 
@@ -515,15 +896,7 @@ export default function Index() {
         <View className="py-4 bg-white mt-2">
           <View className="flex-row justify-between items-center px-4 mb-2">
             <Text className="text-lg font-bold ">Services</Text>
-            <Link href="/" asChild>
-              <Pressable onPress={() => Haptics.selectionAsync()}>
-                <Text className="text-sm font-medium text-foodapp-primary">View all</Text>
-              </Pressable>
-            </Link>
           </View>
-          <Text className="text-sm text-foodapp-muted px-4 mb-3">
-            Discover a variety of services tailored for your needs
-          </Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -532,9 +905,9 @@ export default function Index() {
             snapToInterval={230}
             snapToAlignment="center"
           >
-            {collections.map((collection, index) => (
+            {services.map((service, index) => (
               <Animated.View
-                key={collection.id}
+                key={service.id}
                 entering={FadeIn.delay(100 * index).duration(400)}
                 className="mr-4"
               >
@@ -546,7 +919,7 @@ export default function Index() {
                   }}
                 >
                   <Image
-                    source={collection.image}
+                    source={service.image}
                     style={{
                       width: 220,
                       height: 150,
@@ -567,8 +940,8 @@ export default function Index() {
                       justifyContent: 'flex-end',
                     }}
                   >
-                    <Text className="text-black  font-black text-3xl">{collection.title}</Text>
-                    <Text className="text-gray-800 text-base">{collection.description}</Text>
+                    <Text className="text-black  font-black text-3xl">{service.title}</Text>
+                    <Text className="text-gray-800 text-base line-clamp-1">{service.description}</Text>
                   </LinearGradient>
                 </Pressable>
               </Animated.View>
@@ -578,7 +951,7 @@ export default function Index() {
 
 
         {/* Top Restaurants Title */}
-        <View className="bg-white mt-2 pt-4 px-4">
+        <View className="bg-white mt-2 pt-4 pb-2 px-4">
           <Text className="text-lg font-bold  mb-1">
             {vegOnly ? 'Top Vegetarian Restaurants' : 'Top Restaurants'}
           </Text>
@@ -589,7 +962,7 @@ export default function Index() {
         </View>
 
         {/* Filter Row */}
-        <View className="bg-white py-4">
+        <View className="bg-white pt-2 pb-2">
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -631,7 +1004,7 @@ export default function Index() {
         </View>
 
         {/* Restaurants List */}
-        <View className="px-4 pt-2 pb-6 bg-white">
+        <View className="px-4 pt-4 pb-6 bg-white">
           {storesQuery.isLoading ? (
             // Loading skeleton
             Array(3).fill(0).map((_, i) => (
@@ -683,7 +1056,7 @@ export default function Index() {
 
       {/* Scroll to top button */}
       <Animated.View
-        className="absolute bottom-7 left-0 right-0 flex-row justify-center"
+        className="absolute bottom-3 left-0 right-0 flex-row justify-center"
         style={buttonStyle}
       >
         <TouchableOpacity

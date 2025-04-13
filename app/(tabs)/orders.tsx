@@ -5,25 +5,11 @@ import { Text, View } from '@/components/Themed';
 
 export default function Orders() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Orders</Text>
+    <View className='flex-1'>
+      <View className='p-4 h-5 w-full bg-green-400'>
+        <Text>View Cart</Text>
+      </View>
+      <Text>Orders</Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
-});

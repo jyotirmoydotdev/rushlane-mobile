@@ -3,16 +3,19 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Dimensions, SafeAreaView } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
-import { router, Stack } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { Icon } from '@/components/ui/icon';
 import { ArrowLeft, MapPin, Navigation } from 'lucide-react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { useLocationState } from '@/lib/state/locationState';
 
 export default function LocationMap() {
   const mapRef = useRef<MapView>(null);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [hasSetInitialRegion, setHasSetInitialRegion] = useState(false);
+
+  const getLocationState = useLocationState((state: any) => state.getLocation);
 
   useEffect(() => {
     let isMounted = true;
@@ -67,30 +70,28 @@ export default function LocationMap() {
       <Stack.Screen
         options={{
           title: 'Select delivery location',
-          headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()}>
-              <Icon as={ArrowLeft} />
-            </TouchableOpacity>
-            )
-          }}
-          />
+        }}
+      />
+      <View style={styles.container}>
+        <View className='mx-4 my-2 absolute z-10 w-[94%] '>
           <GooglePlacesAutocomplete
-            placeholder='Search'
+            placeholder='Search for building, street name or area'
             styles={{
               container: {
-                // flex: 0
+                flex: 0,
+                borderRadius: 10
               }
             }}
             onPress={(data, details = null) => {
-            // 'details' is provided when fetchDetails = true
-            console.log(data, details);
+              // 'details' is provided when fetchDetails = true
+              console.log(data, details);
             }}
             query={{
-            key: 'AIzaSyCn88lZvkBwb5Q-LAiCs8Mni56lclVb67s',
-            language: 'en',
+              key: 'AIzaSyCn88lZvkBwb5Q-LAiCs8Mni56lclVb67s',
+              language: 'en',
             }}
           />
-      <View style={styles.container}>
+        </View>
         {/* The map fills most of the screen but leaves exact space for footer */}
 
         <View style={styles.mapContainer}>
@@ -98,8 +99,8 @@ export default function LocationMap() {
             ref={mapRef}
             style={styles.map}
             initialRegion={{
-              latitude: 25.4670, // Approximate center latitude of Meghalaya
-              longitude: 91.3662, // Approximate center longitude of Meghalaya
+              latitude: getLocationState.longatiude, // Approximate center latitude of Meghalaya
+              longitude: getLocationState.longitude, // Approximate center longitude of Meghalaya
               latitudeDelta: 2.5, // Adjusted to cover the whole state
               longitudeDelta: 2.5 // Adjusted to cover the whole state
             }}
@@ -110,8 +111,8 @@ export default function LocationMap() {
             showsCompass={true}
             toolbarEnabled={false}
             region={location ? {
-              latitude: location.coords.latitude, // Approximate center latitude of Meghalaya
-              longitude: location.coords.longitude, // Approximate center longitude of Meghalaya
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
               latitudeDelta: 0.005,
               longitudeDelta: 0.005
             } : undefined}
@@ -159,6 +160,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    position: 'relative'
   },
   mapContainer: {
     height: height - FOOTER_HEIGHT - 80,
