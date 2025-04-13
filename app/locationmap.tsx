@@ -1,3 +1,4 @@
+import 'react-native-get-random-values';
 import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Dimensions, SafeAreaView } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
@@ -15,7 +16,7 @@ export default function LocationMap() {
 
   useEffect(() => {
     let isMounted = true;
-    
+
     const getLocationAsync = async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
@@ -27,14 +28,14 @@ export default function LocationMap() {
         const currentLocation = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.Balanced, // Balance between accuracy and battery
         });
-        
+
         if (isMounted) {
           setLocation(currentLocation);
-          
+
           // Only animate if we have a location and haven't set initial region yet
           if (!hasSetInitialRegion && mapRef.current) {
             setHasSetInitialRegion(true);
-            
+
             // Slight delay to ensure map is ready
             setTimeout(() => {
               if (mapRef.current && isMounted) {
@@ -54,7 +55,7 @@ export default function LocationMap() {
     };
 
     getLocationAsync();
-    
+
     // Cleanup function
     return () => {
       isMounted = false;
@@ -70,14 +71,30 @@ export default function LocationMap() {
             <TouchableOpacity onPress={() => router.back()}>
               <Icon as={ArrowLeft} />
             </TouchableOpacity>
-          )
-        }}
-      />
-      
+            )
+          }}
+          />
+          <GooglePlacesAutocomplete
+            placeholder='Search'
+            styles={{
+              container: {
+                // flex: 0
+              }
+            }}
+            onPress={(data, details = null) => {
+            // 'details' is provided when fetchDetails = true
+            console.log(data, details);
+            }}
+            query={{
+            key: 'AIzaSyCn88lZvkBwb5Q-LAiCs8Mni56lclVb67s',
+            language: 'en',
+            }}
+          />
       <View style={styles.container}>
         {/* The map fills most of the screen but leaves exact space for footer */}
+
         <View style={styles.mapContainer}>
-            <MapView
+          <MapView
             ref={mapRef}
             style={styles.map}
             initialRegion={{
@@ -97,25 +114,25 @@ export default function LocationMap() {
               longitude: location.coords.longitude, // Approximate center longitude of Meghalaya
               latitudeDelta: 0.005,
               longitudeDelta: 0.005
-            }: undefined}
-            >
+            } : undefined}
+          >
             {location && (
               <Marker
-              coordinate={{
-                latitude: location.coords.latitude,
-                longitude: location.coords.longitude
-              }}
-              title="Your Location"
+                coordinate={{
+                  latitude: location.coords.latitude,
+                  longitude: location.coords.longitude
+                }}
+                title="Your Location"
               />
             )}
-            </MapView>
+          </MapView>
         </View>
-        
+
         {/* Footer with fixed height */}
         <View style={styles.footer}>
           <View className='flex-col gap-2 px-2'>
             <View className='flex-row gap-2 items-center justify-start'>
-              <Icon as={Navigation} className='fill-orange-500 stroke-orange-500'/>
+              <Icon as={Navigation} className='fill-orange-500 stroke-orange-500' />
               <Text className='text-2xl font-black'>Dobasipara</Text>
             </View>
             <Text>
