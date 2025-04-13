@@ -4,9 +4,6 @@ import React from 'react'
 export default function ProductCartCard() {
   return (
     <View>
-      <Text>
-        
-      </Text>
     </View>
   )
 }

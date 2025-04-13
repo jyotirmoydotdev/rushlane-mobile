@@ -5,6 +5,7 @@ import { Icon } from '@/components/ui/icon';
 import {
   ArrowUp,
   ChevronDown,
+  ChevronRight,
   Filter,
   Home,
   LocateIcon,
@@ -169,6 +170,18 @@ export default function Index() {
       transform: [{ scale: withTiming(scrollHandler.value > 300 ? 1 : 0.8) }],
     }
   });
+
+
+  const headerAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      height: scrollHandler.value > 50 ? withTiming(70, { duration: 300 }) : withSpring(320),
+    }
+  })
+  const bannerAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      height: scrollHandler.value > 50 ? withTiming(0, { duration: 300 }) : withSpring(320),
+    }
+  })
   const locationAnimatedStyle = useAnimatedStyle(() => {
     const collapseHeight = Math.min(scrollHandler.value, 50);
     return {
@@ -186,19 +199,6 @@ export default function Index() {
     };
   });
 
-  const headerContainer = useAnimatedStyle(() => {
-    return {
-      shadowColor: scrollHandler.value > 50 ? '#000' : 'transparent',
-      shadowOpacity: scrollHandler.value > 50 ? 0.2 : 0,
-      shadowRadius: scrollHandler.value > 50 ? 4 : 0,
-      shadowOffset: {
-        width: 0,
-        height: scrollHandler.value > 50 ? 5 : 0, // Only bottom shadow
-      },
-      elevation: scrollHandler.value > 50 ? 5 : 0, // For Android shadow
-      borderTopWidth: 0, // Ensure no top shadow
-    };
-  });
 
   // XNOTE: Calculate the Scroll Value height instead of using '>'
   // const locationAnimatedStyle = useAnimatedStyle(() => {
@@ -293,9 +293,8 @@ export default function Index() {
       <Tabs.Screen
         options={{
           header: () => (
-            <SafeAreaView className="bg-white ">
-              <Animated.View className="bg-white px-4 pt-2 pb-2" style={headerContainer} >
-
+            <SafeAreaView className="bg-transparent">
+              <Animated.View className=" px-4 pt-2">
                 {/* Location Bar */}
                 <Animated.View style={locationAnimatedStyle} needsOffscreenAlphaCompositing={true} renderToHardwareTextureAndroid={true}>
                   <Link href="/location" asChild>
@@ -312,23 +311,26 @@ export default function Index() {
                             Tura, Meghalaya
                           </Text>
                         )}
-                        <Text className="text-sm font-semibold ">
-                          {errorMsg
-                            ? "Set delivery location"
-                            : location ? "Current Location" : "Detecting location..."}
-                        </Text>
+                        <View className='flex-row gap-1 items-center'>
+                          <Text className="text-sm font-semibold ">
+                            {errorMsg
+                              ? "Set delivery location"
+                              : location ? "Current Location" : "Detecting location..."}
+                          </Text>
+                          <Icon size='sm' as={ChevronRight} className='stroke-gray-500' />
+                        </View>
                       </View>
-                        <Animated.View entering={FadeIn.delay(150).duration(300)}>
+                      <Animated.View entering={FadeIn.delay(150).duration(300)}>
                         <Pressable
                           onPress={() => {
-                          Haptics.selectionAsync();
-                          router.push('/account');
+                            Haptics.selectionAsync();
+                            router.push('/account');
                           }}
                           className="flex-row items-center px-4 py-1.5 rounded-xl border-2 border-gray-700 bg-gray-800"
                         >
                           <Icon as={User} size="lg" className="stroke-gray-50" />
                         </Pressable>
-                        </Animated.View>
+                      </Animated.View>
                     </Pressable>
                   </Link>
                 </Animated.View>
@@ -360,6 +362,7 @@ export default function Index() {
                     </Pressable>
                   </Animated.View>
                 </Animated.View>
+
               </Animated.View>
             </SafeAreaView>
           ),
@@ -370,10 +373,22 @@ export default function Index() {
         ref={scrollRef}
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
-        className="bg-gray-50"
+        className="bg-white"
         needsOffscreenAlphaCompositing={true}
         renderToHardwareTextureAndroid={true}
       >
+
+        {/* <Animated.View className='px-4'>
+          <Image
+            source={require('@/assets/images/banner1.jpg')}
+            style={[{
+              width: '100%',
+              height: 190,
+              marginTop: 10,
+              borderRadius: 12,
+            }]}
+          />
+        </Animated.View> */}
 
         {/* Food Categories */}
         <View className="py-4 bg-white mt-2">
