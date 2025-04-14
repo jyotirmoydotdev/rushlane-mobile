@@ -1,11 +1,18 @@
 import { View, Text, TouchableOpacity } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import { router, Stack } from 'expo-router'
 import { Icon } from '@/components/ui/icon'
 import { ChevronDown, ChevronRight, Navigation, Plus } from 'lucide-react-native'
 import { PlaceholdersAndVanishInput } from '@/components/PlaceHolderAndVanish'
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 
 export default function Location() {
+    const [location, setLocation] = useState({
+        latitude: 0,
+        longitude: 0,
+        latidutedeelta: 0,
+        longitudedelta: 0
+    })
     return (
         <>
             <Stack.Screen
@@ -43,8 +50,19 @@ export default function Location() {
                 </View>
                 <View>
                     <Text className='font-bold text-gray-400'>RECENT LOCATION</Text>
-
                 </View>
+
+                <GooglePlacesAutocomplete
+                    placeholder='Search'
+                    onPress={(data, details = null) => {
+                        // 'details' is provided when fetchDetails = true
+                        console.log(data, details);
+                    }}
+                    query={{
+                        key: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
+                        language: 'en',
+                    }}
+                />
             </View>
         </>
     )
