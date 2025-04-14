@@ -1,31 +1,43 @@
-import { create } from "zustand";
+// state/locationState.ts
+import { create } from 'zustand';
+import type { Region } from 'react-native-maps';
 
-type LocationState = {
-    longitude: number;
-    latitude: number;
-    latitudeDelta: number;
-    longitudeDelta: number;
-    setLocation: (longitude: number, latitude: number) => void;
+type LocationState = Region & {
+    locationName?: string;
+    locationAddress?: string;
+    isLoading: boolean;
+    error?: string;
+    // actions
+    setLoading: (v: boolean) => void;
+    setError: (msg?: string) => void;
+    setLocation: (
+        longitude: number,
+        latitude: number,
+        name?: string,
+        address?: string
+    ) => void;
 };
 
-// Default coordinates for Meghalaya
-const DEFAULT_LONGITUDE = 91.3662;
-const DEFAULT_LATITUDE = 25.4670;
-
 export const useLocationState = create<LocationState>((set) => ({
-    // Initialize with default values
-    longitude: DEFAULT_LONGITUDE,
-    latitude: DEFAULT_LATITUDE,
+    latitude: 25.4670,
+    longitude: 91.3662,
     latitudeDelta: 2.5,
     longitudeDelta: 2.5,
+    locationName: undefined,
+    locationAddress: undefined,
+    isLoading: false,
+    error: undefined,
 
-    // Simple setter that doesn't depend on previous state
-    setLocation: (longitude: number, latitude: number) => 
+    setLoading: (isLoading) => set({ isLoading }),
+    setError: (error) => set({ error }),
+    setLocation: (longitude, latitude, locationName, locationAddress) =>
         set({
             longitude,
             latitude,
-            // Keep deltas constant
             latitudeDelta: 0.005,
             longitudeDelta: 0.005,
+            locationName,
+            locationAddress,
+            error: undefined,
         }),
 }));

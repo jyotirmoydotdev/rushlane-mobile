@@ -46,6 +46,7 @@ import he from 'he'
 import { useLocationState } from '@/lib/state/locationState';
 import { useFetchProductsQuery } from '@/lib/query/useFetchProductsQuery';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useUserLocation } from '@/lib/hooks/useUserLocation';
 
 interface RestaurantCardProps {
   id: number;
@@ -157,9 +158,8 @@ const RestaurantCard = ({
 };
 
 export default function Index() {
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  // const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('delivery');
   const [vegOnly, setVegOnly] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
@@ -583,26 +583,7 @@ export default function Index() {
     },
   ];
 
-  // const fetchProducts = useFetchProductsQuery()
-
-  useEffect(() => {
-    async function getCurrentLocation() {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
-      setLocationState({
-        longitude: location.coords.longitude,
-        latitude: location.coords.latitude,
-      });
-    }
-
-    getCurrentLocation();
-  }, []);
+  const {location, isLoading, locationName, error} = useUserLocation()
 
   const insets = useSafeAreaInsets();
   return (
@@ -625,7 +606,7 @@ export default function Index() {
                       <View className="ml-1 flex-1">
                         {location && (
                           <Text className="text-lg font-bold text-foodapp-muted">
-                            Tura, Meghalaya
+                            {isLoading?'Loading...':locationName}
                           </Text>
                         )}
                         <View className='flex-row gap-1 items-center'>
