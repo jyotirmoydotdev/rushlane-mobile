@@ -8,6 +8,7 @@ import { Icon } from '@/components/ui/icon';
 import { Navigation } from 'lucide-react-native';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { useLocationState } from '@/lib/state/locationState';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function LocationMap() {
   const mapRef = useRef<MapView>(null);
@@ -202,17 +203,22 @@ export default function LocationMap() {
     }
   };
 
+  const insets = useSafeAreaInsets();
   return (
     <>
       <Stack.Screen
         options={{
           title: 'Select delivery location',
           headerShown: true,
+          headerTransparent: true,
+          headerStyle:{
+            backgroundColor: 'white'
+          }
         }}
       />
-      <View className='flex-1'>
+      <View className="bg-white" style={{ paddingTop: insets.top, backgroundColor: 'white' }}>
 
-        <View className=' absolute top-0 z-10 w-full'>
+        <View className=' absolute z-10 top-0 px-2 bg-white w-full' style={{paddingTop: insets.top*2}}>
           <GooglePlacesAutocomplete
             placeholder='Search for building, street name or area'
             fetchDetails={true}
@@ -241,7 +247,7 @@ export default function LocationMap() {
               ref={mapRef}
               style={{
                 width: '100%',
-                height: '100%',
+                height: '100%'
               }}
               initialRegion={mapRegion}
               // Remove the region prop to prevent continuous updates
@@ -268,7 +274,7 @@ export default function LocationMap() {
             </MapView>
           )}
 
-        <View className=' absolute  z-5 w-full rounded-t-2xl p-5'>
+        <View className=' absolute bottom-0 bg-white w-full rounded-t-2xl p-5'>
           <View className='mb-4'>
             <View className='flex-row items-center mb-1'>
               <Icon as={Navigation} className='fill-orange-500 stroke-orange-500' />
@@ -286,7 +292,6 @@ export default function LocationMap() {
             <Text className='text-white text-base font-semibold'>Confirm Location</Text>
           </TouchableOpacity>
         </View>
-
       </View>
     </>
   );
