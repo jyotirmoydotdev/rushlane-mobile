@@ -1,3 +1,4 @@
+import { ProductType, ProductTypeResponse } from '@/lib/type/productType';
 import axios from 'axios'
 
 export interface ProductsQueryParams {
@@ -10,7 +11,7 @@ export interface ProductsQueryParams {
 }
 
 
-export async function GET(request: Request, { id }: Record<string, string>) {
+export async function GET(request: Request) {
     const url = new URL(request.url);
 
     const queryParams: ProductsQueryParams = {
@@ -55,12 +56,14 @@ export async function GET(request: Request, { id }: Record<string, string>) {
 
         const products: any[] = res.data;
 
+        const productDataConverted: ProductType[] = convertToProductTypeAll(products)
+
         const hasNextPage = products.length === perPage;
         const nextPage = hasNextPage ? currentPage + 1 : null;
         const prevPage = currentPage > 1 ? currentPage - 1 : null;
 
         return Response.json({
-            products,
+            productDataConverted,
             pagination: {
                 currentPage,
                 perPage,
@@ -79,5 +82,53 @@ export async function GET(request: Request, { id }: Record<string, string>) {
             },
             { status: 500 }
         );
+    }
+}
+
+function convertToProductTypeAll(productData: ProductTypeResponse[]): ProductType[] {
+    const productList: ProductType[] = []
+    productData.forEach((product) => {
+        const convertedProduct = convertToProductType(product);
+        productList.push(convertedProduct);
+    });
+    return productList
+}
+
+
+function convertToProductType(productData: ProductTypeResponse):ProductType {
+    return {
+        id: productData.id,
+        name: productData.name,
+        slug: productData.slug,
+        type: productData.type,
+        status: productData.status,
+        description: productData.description,
+        price: productData.price,
+        regular_price: productData.regular_price,
+        sale_price: productData.sale_price,
+        on_sale: productData.on_sale,
+        categories: productData.categories,
+        images: productData.images,
+        attributes: productData.attributes ? productData.attributes.filter(attribute => attribute.visible): [],
+        variations: productData.variations,
+        related_ids: productData.related_ids,
+        stock_status: productData.stock_status,
+        has_options: productData.has_options,
+        store: productData.store.disable_vendor === "yes" ? null : {
+            vendor_id: productData.store.vendor_id,
+            vendor_shop_name: productData.store.vendor_shop_name,
+            store_hide_email: productData.store.store_hide_email === "yes" ? true : false,
+            store_hide_address: productData.store.store_hide_address === "yes"? true: false,
+            store_hide_description: productData.store.store_hide_description === "yes"? true: false,
+            store_hide_policy: productData.store.store_hide_policy === "yes" ? true : false,
+            vendor_email: productData.store.store_hide_email === "yes" ? null : productData.store.vendor_email,
+            vendor_address: productData.store.store_hide_address === "yes" ? null: productData.store.vendor_address,
+            disable_vendor: productData.store.disable_vendor  === "yes" ? true : false,
+            is_store_offline: productData.store.is_store_offline === "yes" ? true : false,
+            vendor_shop_logo: productData.store.vendor_shop_logo,
+            vendor_banner: productData.store.vendor_banner,
+            store_rating: productData.store.store_rating === "" ? 0 : productData.store.store_rating,
+            email_verified: productData.store.email_verified
+        }
     }
 }

@@ -1,4 +1,6 @@
-export interface ProductType {
+import { storeType } from "./storeType";
+
+export interface ProductTypeResponse {
     id: number;
     name: string;
     slug: string;
@@ -129,7 +131,7 @@ export interface ProductType {
         mobile_banner: string;
         vendor_list_banner_type: string;
         vendor_list_banner: string;
-        store_rating: string;
+        store_rating: string | number;
         email_verified: string;
         vendor_additional_info: {
             type: string;
@@ -169,4 +171,63 @@ export interface ProductType {
             href: string;
         }[];
     };
+}
+
+export interface ProductType {
+    id: number,
+    name: string,
+    slug: string,
+    type: string,
+    status: string,
+    description: string,
+    price: string,
+    regular_price: string,
+    sale_price: string,
+    on_sale: boolean,
+    categories: {
+        id: number;
+        name: string;
+        slug: string;
+    }[],
+    images: {
+        id: number;
+        date_created: string;
+        date_created_gmt: string;
+        date_modified: string;
+        date_modified_gmt: string;
+        src: string;
+        name: string;
+        alt: string;
+        [key: string]: string | number; // For all the image size variations
+    }[],
+    attributes: {
+        id: number;
+        name: string;
+        slug: string;
+        position: number;
+        visible: boolean;
+        variation: boolean;
+        options: string[];
+    }[],
+    variations: number[],
+    related_ids: number[],
+    stock_status: string,
+    has_options: boolean,
+    store: {
+        vendor_id: number,
+        vendor_shop_name: string,
+        store_hide_email: boolean,
+        store_hide_address: boolean,
+        store_hide_description: boolean,
+        store_hide_policy: boolean,
+
+        vendor_email: string|null,
+        vendor_address: string|null,
+        disable_vendor: boolean
+        is_store_offline: boolean,
+        vendor_shop_logo: string,
+        vendor_banner: string,
+        store_rating: number | string,
+        email_verified: string,
+    } | null,
 }
