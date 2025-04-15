@@ -1006,14 +1006,10 @@ export default function Index() {
             </Text>
           ) : (
             stores?.map((store, index) => (
-              <Animated.View
-                key={store.id}
-                entering={FadeIn.delay(100 * index).duration(400)}
-              >
+              <Link asChild key={index} href={`/store/${store.id}`} push>
                 <Pressable
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    router.push(`/store/${store.id}`);
                   }}
                   className="mb-6"
                 >
@@ -1030,7 +1026,7 @@ export default function Index() {
                   // discount={store.discount ?? '50% OFF up to ₹100'}
                   />
                 </Pressable>
-              </Animated.View>
+                </Link>
             ))
           )}
         </View>

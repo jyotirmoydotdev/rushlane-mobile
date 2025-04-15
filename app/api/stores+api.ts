@@ -6,7 +6,6 @@ export async function GET(_request: Request) {
         const response = await axios.get<storeResponseType[]>(`https://www.rushlane.net/wp-json/wcfmmp/v1/store-vendors`,{
             params: {
                 per_page: 30,
-                orderby: 'rating',
             }
         });
 
