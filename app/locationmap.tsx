@@ -52,7 +52,7 @@ export default function LocationMap() {
       />
       <View className="bg-white" style={{ paddingTop: insets.top, backgroundColor: 'white' }}>
 
-        <View className=' absolute z-10 top-0 px-2 bg-white w-full' style={{paddingTop: insets.top*2}}>
+        <View className=' absolute z-10 top-0 px-2  w-full' style={{paddingTop: insets.top*2}}>
           <GooglePlacesAutocomplete
             placeholder='Search for building, street name or area'
             fetchDetails={true}
@@ -68,6 +68,28 @@ export default function LocationMap() {
             enablePoweredByContainer={true}
             debounce={300}
             minLength={3}
+            styles={{
+              textInput: {
+                borderColor: '#d1d5db',
+                borderWidth: 2,
+                borderRadius: 18,
+                height: 58,
+                fontSize: 16,
+                paddingHorizontal: 16,
+                margin: 6,
+              },
+              listView: {
+                marginHorizontal: 6,
+                backgroundColor: 'white',
+                borderRadius: 18,
+                paddingTop: 8
+              },
+              row:{
+                width: '100%',
+                backgroundColor: 'white',
+              },
+              
+            }}
           />
         </View>
 
@@ -108,7 +130,7 @@ export default function LocationMap() {
             </MapView>
           )}
 
-        <View className=' absolute bottom-0 bg-white w-full rounded-t-2xl p-5'>
+        <View className=' absolute bottom-2 bg-white w-full rounded-t-3xl p-5'>
           <View className='mb-4'>
             <View className='flex-row items-center mb-1'>
               <Icon as={Navigation} className='fill-orange-500 stroke-orange-500' />

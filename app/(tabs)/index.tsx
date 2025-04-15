@@ -595,7 +595,7 @@ export default function Index() {
               <Animated.View className=" px-4 pt-2 pb-2" style={headerContainerStyle}>
                 {/* Location Bar */}
                 <Animated.View style={locationAnimatedStyle}>
-                  <Link href="/location" asChild>
+                  <Link href="/locationmap" asChild>
                     <Pressable
                       className="flex-row items-center pt-1 pb-6  overflow-hidden"
                       onPress={() => Haptics.selectionAsync()}
