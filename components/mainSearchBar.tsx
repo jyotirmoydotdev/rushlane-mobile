@@ -8,11 +8,9 @@ import { Svg, Line, Path } from 'react-native-svg';
 export function PlaceholdersAndVanishInput({
   placeholders,
   onChange,
-  onSubmit,
 }: {
   placeholders: string[];
   onChange: (text: string) => void;
-  onSubmit: () => void;
 }) {
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
   const [value, setValue] = useState('');
@@ -177,12 +175,11 @@ export function PlaceholdersAndVanishInput({
     });
     
     // Call the onSubmit callback
-    onSubmit();
   };
 
-  const handleSubmitEditing = () => {
-    vanishAndSubmit();
-  };
+  // const handleSubmitEditing = () => {
+  //   vanishAndSubmit();
+  // };
 
   return (
     <View style={styles.container}>
@@ -225,7 +222,7 @@ export function PlaceholdersAndVanishInput({
               onChange(text);
             }
           }}
-          onSubmitEditing={handleSubmitEditing}
+          // onSubmitEditing={handleSubmitEditing}
         />
         
         {/* Placeholder Animation */}

@@ -24,7 +24,6 @@ export default function SearchInput() {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<null | any>(null);
   const [searchQuery, setSearchQuery] = useState('');
-
   const [selectedCategory, setCategory] = useState<number>(0);
 
   const categories = useFetchCategoriesQuery();
@@ -79,51 +78,12 @@ export default function SearchInput() {
     setModalVisible(false);
   }, []);
 
-  const fetchProductsfunc = async ({
-    pageParam = 1
-  }): Promise<{
-    storeProducts: any[];
-    currentPage: number;
-    nextPage: number | null;
-    prevPage: number | null;
-    perPage: number;
-    hasNextPage: boolean;
-  }> => {
-    const perPage = 10;
-    const url = new URL(`/api/products`, window.location.origin);
-    url.searchParams.append('page', pageParam.toString());
-    url.searchParams.append('per_page', perPage.toString());
-    if (selectedCategory !== 0) {
-      url.searchParams.append('category', String(selectedCategory));
-    }
-    if (searchQuery) url.searchParams.append('search', searchQuery);
-
-    const res = await fetch(url.toString());
-    if (!res.ok) {
-      throw new Error('Failed to fetch products');
-    }
-    const data = await res.json();
-
-    return {
-      storeProducts: data.products || [],
-      currentPage: data.pagination.currentPage,
-      perPage: data.pagination.perPage,
-      nextPage: data.pagination.nextPage,
-      prevPage: data.pagination.prevPage,
-      hasNextPage: data.pagination.hasNextPage,
-    };
-  };
-
-  const fetchProducts = useInfiniteQuery({
-    queryKey: ['storeProducts', searchQuery, selectedCategory],
-    queryFn: fetchProductsfunc,
-    initialPageParam: 1,
-    getNextPageParam: last => last.nextPage ?? undefined,
-    getPreviousPageParam: first => first.prevPage ?? undefined,
+  // Using the improved useFetchProductsQuery hook from file3.tsx
+  const fetchProducts = useFetchProductsQuery({
+    searchQuery: searchQuery,
+    selectedCategory: selectedCategory,
+    perPage: 10
   });
-
-  // XNOTE: keep the useQuery seperate
-  // const fetchProducts = useFetchProductsQuery()
 
   const loadMoreProducts = useCallback(() => {
     if (fetchProducts.hasNextPage && !fetchProducts.isFetchingNextPage) {
@@ -174,20 +134,6 @@ export default function SearchInput() {
           </View>
           <Text className='mt-2 w-20 line-clamp-1 text-xs text-[#333] text-center'>View All</Text>
         </Pressable>
-        {/* {categories.data?.map((category: any) => (
-          <div
-            key={category.id}
-            className={`items-center mr-4 ${category.id === selectedCategory ? 'selected-class' : ''}`}
-            onClick={() => setCategory(category.id)}
-          >
-            {!category.image ? (
-              <div>{category.name.slice(0, 1)}</div>
-            ) : (
-              <img src={category.image} alt={category.name} />
-            )}
-            {category.name}
-          </div>
-        ))} */}
         {categories.data?.map((category: any) => (
           <TouchableOpacity
             key={category.id}
@@ -257,7 +203,6 @@ export default function SearchInput() {
     );
   }, [fetchProducts.isLoading, fetchProducts.isRefetching]);
 
-
   // Memoize footer component
   const FooterComponent = useCallback(() => {
     if (fetchProducts.isFetchingNextPage) {
@@ -276,7 +221,8 @@ export default function SearchInput() {
       );
     }
 
-    const allProducts = fetchProducts.data?.pages.flatMap(page => page.storeProducts) || [];
+  // @ts-ignore-next-line
+  const allProducts: ProductType[] = fetchProducts.data?.pages.flatMap(page => page.products) || [];
     if (allProducts.length > 0) {
       return <Text className="text-center py-4 text-gray-500">No more products</Text>;
     }
@@ -284,8 +230,8 @@ export default function SearchInput() {
     return null;
   }, [fetchProducts.isFetchingNextPage, fetchProducts.hasNextPage, fetchProducts.data?.pages, loadMoreProducts]);
 
-  // Combine all pages of products into a single array
-  const allProducts: ProductType[] = fetchProducts.data?.pages.flatMap(page => page.storeProducts) || [];
+  // @ts-ignore-next-line
+  const allProducts: ProductType[] = fetchProducts.data?.pages.flatMap(page => page.products) || [];
 
   // Memoize renderItem function to prevent unnecessary re-renders
   const renderItem = useCallback(({ item }: { item: ProductType }) => (
@@ -337,7 +283,6 @@ export default function SearchInput() {
             <PlaceholdersAndVanishInput
               placeholders={['Search for Pizza', 'Find something', 'Type here...']}
               onChange={handleSearch}
-              onSubmit={() => console.log('Submitted')}
             />
             <ListHeader />
           </>
@@ -360,51 +305,6 @@ export default function SearchInput() {
         </TouchableOpacity>
       </Animated.View>
 
-      {/* Performance optimized modal implementation */}
-      {modalVisible && (
-        <HalfScreenModal
-          isVisible={modalVisible}
-          onClose={closeModal}
-          title="Product Details"
-          data={selectedItem}
-          height={60}
-        >
-          {selectedItem && (
-            <FlatList
-              data={selectedItem.attributes}
-              keyExtractor={(item) => item.id.toString()}
-
-              renderItem={({ item }) => (
-                <View className='flex-col justify-between mb-4 gap-4 border-b border-gray-300 pb-4'>
-                  <View>
-                    <Text className='text-2xl font-semibold'>{item.name}</Text>
-                    <Text>{`Choose one out of this ${item.options.length} options`}</Text>
-                  </View>
-                  <View className='flex-col gap-2'>
-                    {item.options.map((option: any, index: number) => (
-                      <View key={index} className='flex flex-row gap-2'>
-                        <Checkbox size="md" value=''>
-                          <CheckboxIndicator>
-                            <CheckboxIcon as={CheckIcon} />
-                          </CheckboxIndicator>
-                        </Checkbox>
-                        <Text>{option}</Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              )}
-              ListFooterComponent={() => (
-                <Button>
-                  <ButtonText>
-                    Add to Cart
-                  </ButtonText>
-                </Button>
-              )}
-            />
-          )}
-        </HalfScreenModal>
-      )}
     </>
   );
 }

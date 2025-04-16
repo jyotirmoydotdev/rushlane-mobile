@@ -184,6 +184,8 @@ export interface ProductType {
     regular_price: string,
     sale_price: string,
     on_sale: boolean,
+    average_rating: string;
+    rating_count: number;
     categories: {
         id: number;
         name: string;

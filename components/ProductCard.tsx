@@ -81,7 +81,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, setSelectedItem, setMod
         </View>
         <TouchableOpacity onPress={() => router.push(`/store/${item.store.vendor_id}`)} className='flex-row items-center gap-1'>
           <Icon as={ChefHat} className='w-4 h-4 stroke-blue-500' />
-          <Text className='text-base text-blue-500 font-medium'>{he.decode(item.store.vendor_shop_name)}</Text>
+          <Text className='text-base text-blue-500 font-medium'>{he.decode(item.store.vendor_shop_name ?? 'No Shop Name')}</Text>
         </TouchableOpacity>
         <View className='flex-row gap-2 pt-2 items-center'>
           <View className=' p-2.5 bg-gray-50 rounded-full border border-gray-200 outline'>

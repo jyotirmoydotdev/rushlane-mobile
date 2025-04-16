@@ -114,6 +114,8 @@ function convertToProductType(productData: ProductTypeResponse):ProductType {
         related_ids: productData.related_ids,
         stock_status: productData.stock_status,
         has_options: productData.has_options,
+        average_rating: productData.average_rating,
+        rating_count: productData.rating_count,
         store: productData.store.disable_vendor === "yes" ? null : {
             vendor_id: productData.store.vendor_id,
             vendor_shop_name: productData.store.vendor_shop_name,

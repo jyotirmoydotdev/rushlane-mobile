@@ -75,12 +75,7 @@ function convertToStoreType(storeData: storeResponseType): storeType {
 function validateStoreData(storeData: storeResponseType[]) : storeResponseType[] {
     const validStores : storeResponseType[] = []
     storeData.forEach((store) => {
-        if (
-            store.vendor_id && 
-            store.vendor_display_name && 
-            store.vendor_shop_name &&
-            store.disable_vendor === "no"
-        ) {
+        if ( store.disable_vendor === "no") {
             validStores.push(store);
         }
     });
