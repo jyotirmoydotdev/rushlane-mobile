@@ -63,7 +63,7 @@ export async function GET(request: Request) {
         const prevPage = currentPage > 1 ? currentPage - 1 : null;
 
         return Response.json({
-            productDataConverted,
+            products: productDataConverted,
             pagination: {
                 currentPage,
                 perPage,

@@ -58,9 +58,6 @@ function RootLayoutNav() {
               headerTitle: "Cart",
               headerBackTitle: "Back",
             }} />
-            <Stack.Screen name="location" options={{
-              headerBackTitle: "Back",
-            }} />
             <Stack.Screen name="store" options={{
               headerTitle: '',
               headerBackTitle: "Back",

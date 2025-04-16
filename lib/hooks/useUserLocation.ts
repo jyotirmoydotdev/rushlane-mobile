@@ -20,6 +20,7 @@ export function useUserLocation({ mapRef, skipGeocode }: UseUserLocationOptions 
     isLoading,
     error,
     setLoading,
+    
     setError,
     setLocation,
   } = useLocationState();
@@ -118,6 +119,55 @@ export function useUserLocation({ mapRef, skipGeocode }: UseUserLocationOptions 
     [mapRef, setLocation]
   );
 
+  const currentlocation = useCallback(
+    async () => {
+      setLoading(true);
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setError('Permission to access location was denied');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const loc = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+
+        const { latitude: lat, longitude: lng } = loc.coords;
+
+        let name: string | undefined;
+        let address: string | undefined;
+
+        try {
+          const geocode = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lng });
+          if (geocode.length > 0) {
+            const p = geocode[0];
+            name = p.name || p.district || 'Selected Location';
+            address = [p.street, p.district, p.city, p.region, p.country]
+              .filter(Boolean)
+              .join(', ');
+          }
+        } catch (e) {
+          console.warn('Geocoding error', e);
+        }
+
+        setLocation(lng, lat, name, address);
+
+        if (mapRef?.current) {
+          const region: Region = { latitude: lat, longitude: lng, latitudeDelta: 0.005, longitudeDelta: 0.005 };
+          mapRef.current.animateToRegion(region, 500);
+        }
+      } catch (err) {
+        console.error(err);
+        setError((err as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [mapRef, setError, setLocation, setLoading]
+  );
+
   return {
     // state
     location: { latitude, longitude, latitudeDelta, longitudeDelta },
@@ -127,5 +177,6 @@ export function useUserLocation({ mapRef, skipGeocode }: UseUserLocationOptions 
     error,
     // action
     handleLocationSelect,
+    currentlocation,
   };
 }
