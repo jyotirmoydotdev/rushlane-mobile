@@ -47,9 +47,6 @@ export default function StorePage() {
     const setVegStatus = useVegStatus((state: any) => state.setVegStatus);
     const getVegStatus: boolean = useVegStatus((state: any) => state.isVeg);
 
-    const [modalVisible, setModalVisible] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<null | any>(null);
-
     const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const flatListRef = useAnimatedRef<FlatList>();
@@ -137,9 +134,6 @@ export default function StorePage() {
         }, 300);
     }, []);
 
-    const closeModal = useCallback(() => {
-        setModalVisible(false);
-    }, []);
 
     // Function to handle adding products to cart
     const addToCart = (product: any) => {
@@ -218,8 +212,6 @@ export default function StorePage() {
     const renderItem = useCallback(({ item }: { item: ProductType }) => (
         <MemoizedProductCard
             item={item}
-            setModalVisible={setModalVisible}
-            setSelectedItem={setSelectedItem}
         />
     ), []);
 
@@ -280,7 +272,6 @@ export default function StorePage() {
                             <PlaceholdersAndVanishInput
                                 placeholders={['Search for Pizza', 'Find something', 'Type here...']}
                                 onChange={handleSearch}
-                                onSubmit={() => console.log('Submitted')}
                             />
                         </>
                     }
@@ -298,51 +289,6 @@ export default function StorePage() {
                     </TouchableOpacity>
                 </Animated.View>
             </View>
-            {/* Performance optimized modal implementation */}
-            {modalVisible && (
-                <HalfScreenModal
-                    isVisible={modalVisible}
-                    onClose={closeModal}
-                    title="Product Details"
-                    data={selectedItem}
-                    height={60}
-                >
-                    {selectedItem && (
-                        <FlatList
-                            data={selectedItem.attributes}
-                            keyExtractor={(item) => item.id.toString()}
-
-                            renderItem={({ item }) => (
-                                <View className='flex-col justify-between mb-4 gap-4 border-b border-gray-300 pb-4'>
-                                    <View>
-                                        <Text className='text-2xl font-semibold'>{item.name}</Text>
-                                        <Text>{`Choose one out of this ${item.options.length} options`}</Text>
-                                    </View>
-                                    <View className='flex-col gap-2'>
-                                        {item.options.map((option: any, index: number) => (
-                                            <View key={index} className='flex flex-row gap-2'>
-                                                <Checkbox size="md" value=''>
-                                                    <CheckboxIndicator>
-                                                        <CheckboxIcon as={CheckIcon} />
-                                                    </CheckboxIndicator>
-                                                </Checkbox>
-                                                <Text>{option}</Text>
-                                            </View>
-                                        ))}
-                                    </View>
-                                </View>
-                            )}
-                            ListFooterComponent={() => (
-                                <Button>
-                                    <ButtonText>
-                                        Add to Cart
-                                    </ButtonText>
-                                </Button>
-                            )}
-                        />
-                    )}
-                </HalfScreenModal>
-            )}
         </>
     );
 }

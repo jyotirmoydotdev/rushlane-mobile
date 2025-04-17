@@ -39,9 +39,8 @@ function RootLayoutNav() {
               headerShown: false,
             }} />
             <Stack.Screen name="categories" options={{ 
-              presentation: 'modal',
               headerTitle: "Categories",
-              sheetElevation: 0,
+              headerBackTitle: "Back"
             }} />
             <Stack.Screen name="search" options={{
               headerShown: true,

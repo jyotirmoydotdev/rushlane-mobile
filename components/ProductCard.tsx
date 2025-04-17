@@ -1,5 +1,4 @@
 import { View, Text, TouchableOpacity } from 'react-native'
-import { StyleSheet } from 'react-native';
 import React from 'react'
 import { Icon } from './ui/icon';
 import { Bookmark, Share, ChefHat, Star, Triangle, Circle, CheckIcon } from 'lucide-react-native';
@@ -9,17 +8,9 @@ import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import he from 'he';
 import { useCart } from '@/lib/state/cartState';
-import {
-  Actionsheet,
-  ActionsheetContent,
-  ActionsheetItem,
-  ActionsheetItemText,
-  ActionsheetDragIndicator,
-  ActionsheetDragIndicatorWrapper,
-  ActionsheetBackdrop,
-  ActionsheetSectionHeaderText,
-} from "@/components/ui/actionsheet"
+import { Actionsheet, ActionsheetContent, ActionsheetItem, ActionsheetItemText, ActionsheetDragIndicator, ActionsheetDragIndicatorWrapper, ActionsheetBackdrop, ActionsheetSectionHeaderText } from "@/components/ui/actionsheet"
 import { Checkbox, CheckboxIcon, CheckboxIndicator } from './ui/checkbox';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = {
   id: string | number,
@@ -31,21 +22,13 @@ type Props = {
   stock_status: string,
   store_name: string,
   on_sale: boolean,
-  openModal: (item: any) => void,
 }
 
 interface ProductCardProps {
   item: any;
-  setSelectedItem: React.Dispatch<React.SetStateAction<null>>;
-  setModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ item, setSelectedItem, setModalVisible }) => {
-  const openModal = (item: any) => {
-    setSelectedItem(item);
-    setModalVisible(true);
-  };
-
+const ProductCard: React.FC<ProductCardProps> = ({ item }) => {
   const addProduct = useCart((state: any) => state.addProduct);
   const vendorId = useCart((state: any) => state.vendorId);
 
@@ -59,7 +42,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, setSelectedItem, setMod
         {
           item.on_sale ? (
             <View className='flex-row items-center gap-2'>
-              <Text className='text-lg font-semibold'>₹ 200{item.sale_price}</Text>
+              <Text className='text-lg font-semibold'>₹ {item.sale_price}</Text>
               <Text className='text-base text-gray-500 line-through'>₹{item.regular_price}</Text>
             </View>
           ) : (

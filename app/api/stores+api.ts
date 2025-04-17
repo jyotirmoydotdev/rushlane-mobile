@@ -6,6 +6,26 @@ export async function GET(_request: Request) {
         const response = await axios.get<storeResponseType[]>(`https://www.rushlane.net/wp-json/wcfmmp/v1/store-vendors`,{
             params: {
                 per_page: 30,
+                _fields: String([
+                    'vendor_id',
+                    'vendor_shop_name',
+                    'store_hide_email',
+                    'store_hide_phone',
+                    'store_hide_address',
+                    'store_hide_description',
+                    'store_hide_policy',
+                    'email_verified',
+                    'vendor_email',
+                    'disable_vendor',
+                    'vendor_address',
+                    'vendor_description',
+                    'vendor_banner',
+                    'vendor_banner_type',
+                    'mobile_banner',
+                    'vendor_shop_logo',
+                    'store_rating',
+                    'vendor_policies',
+                ])
             }
         });
 

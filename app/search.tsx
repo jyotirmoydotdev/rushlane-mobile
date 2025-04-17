@@ -1,30 +1,26 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, ActivityIndicator, FlatList, ScrollView, Pressable, TouchableOpacity } from 'react-native';
-import { router, Stack } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { Button, ButtonText } from '@/components/ui/button';
 import { ArrowUp, Search, ShoppingCart, Utensils } from 'lucide-react-native';
 import { Icon } from '@/components/ui/icon';
-import { useInfiniteQuery } from '@tanstack/react-query';
 import ProductCard from '@/components/ProductCard';
 import { ProductType } from '@/lib/type/productType';
 import { PlaceholdersAndVanishInput } from '@/components/mainSearchBar';
 import { useFetchCategoriesQuery } from '@/lib/query/useFetchCategoriesQuery';
 import { Image } from 'expo-image';
 import { blurhash } from '@/constants/blurHash';
-import HalfScreenModal from '@/components/modelComp';
 import Animated, { useAnimatedRef, useAnimatedStyle, useAnimatedScrollHandler, withTiming, useSharedValue } from 'react-native-reanimated'
-import { Checkbox, CheckboxIndicator, CheckboxIcon } from "@/components/ui/checkbox"
-import { CheckIcon } from "@/components/ui/icon"
 import { useFetchProductsQuery } from '@/lib/query/useFetchProductsQuery';
 import { Link } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 
 const AnimatedFlatList = Animated.FlatList;
 
 export default function SearchInput() {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<null | any>(null);
+  const {categogries} = useLocalSearchParams<{categogries?: string}>();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setCategory] = useState<number>(0);
+  const [selectedCategory, setCategory] = useState<number>(Number(categogries) ?? 0);
 
   const categories = useFetchCategoriesQuery();
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -32,14 +28,12 @@ export default function SearchInput() {
   const flatListRef = useAnimatedRef<FlatList>();
   const scrollY = useSharedValue(0);
 
-  // Create scroll handler to track scroll position
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       scrollY.value = event.contentOffset.y;
     },
   });
 
-  // Animated style for the scroll-to-top button
   const scrollToTopButtonStyle = useAnimatedStyle(() => {
     return {
       opacity: scrollY.value > 600 ? withTiming(1) : withTiming(0),
@@ -47,12 +41,10 @@ export default function SearchInput() {
     };
   });
 
-  // Function to scroll to top
   const scrollToTop = () => {
     flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
   };
 
-  // Clear timeout when component unmounts
   useEffect(() => {
     return () => {
       if (searchTimeoutRef.current) {
@@ -61,24 +53,16 @@ export default function SearchInput() {
     };
   }, []);
 
-  // Debounced search handler
   const handleSearch = useCallback((text: string) => {
-    // Clear previous timeout
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
 
-    // Set new timeout to update searchQuery after 300ms
     searchTimeoutRef.current = setTimeout(() => {
       setSearchQuery(text);
     }, 300);
   }, []);
 
-  const closeModal = useCallback(() => {
-    setModalVisible(false);
-  }, []);
-
-  // Using the improved useFetchProductsQuery hook from file3.tsx
   const fetchProducts = useFetchProductsQuery({
     searchQuery: searchQuery,
     selectedCategory: selectedCategory,
@@ -91,10 +75,8 @@ export default function SearchInput() {
     }
   }, [fetchProducts]);
 
-  // Memoize the product card to prevent unnecessary re-renders
   const MemoizedProductCard = React.memo(ProductCard);
 
-  // Memoize category list to prevent re-rendering
   const CategoryList = useCallback(() => {
     if (categories.isLoading) {
       return (
@@ -173,7 +155,6 @@ export default function SearchInput() {
     );
   }, [categories.isLoading, categories.isError, categories.data, selectedCategory]);
 
-  // Memoize header component to prevent re-renders
   const ListHeader = useCallback(() => {
     return (
       <View className='my-4'>
@@ -184,7 +165,6 @@ export default function SearchInput() {
     );
   }, [CategoryList]);
 
-  // Memoize empty component
   const EmptyListComponent = useCallback(() => {
     if (fetchProducts.isLoading || fetchProducts.isRefetching) {
       return (
@@ -203,7 +183,6 @@ export default function SearchInput() {
     );
   }, [fetchProducts.isLoading, fetchProducts.isRefetching]);
 
-  // Memoize footer component
   const FooterComponent = useCallback(() => {
     if (fetchProducts.isFetchingNextPage) {
       return (
@@ -221,8 +200,8 @@ export default function SearchInput() {
       );
     }
 
-  // @ts-ignore-next-line
-  const allProducts: ProductType[] = fetchProducts.data?.pages.flatMap(page => page.products) || [];
+    // @ts-ignore-next-line
+    const allProducts: ProductType[] = fetchProducts.data?.pages.flatMap(page => page.products) || [];
     if (allProducts.length > 0) {
       return <Text className="text-center py-4 text-gray-500">No more products</Text>;
     }
@@ -233,17 +212,15 @@ export default function SearchInput() {
   // @ts-ignore-next-line
   const allProducts: ProductType[] = fetchProducts.data?.pages.flatMap(page => page.products) || [];
 
-  // Memoize renderItem function to prevent unnecessary re-renders
   const renderItem = useCallback(({ item }: { item: ProductType }) => (
     <MemoizedProductCard
       item={item}
-      setModalVisible={setModalVisible}
-      setSelectedItem={setSelectedItem}
     />
   ), []);
 
   return (
     <>
+    <Text>categogries: {categogries}</Text>
       <AnimatedFlatList
         onScroll={scrollHandler}
         ref={flatListRef}
@@ -273,7 +250,7 @@ export default function SearchInput() {
                 },
                 headerRight: () => (
                   <Link href={'/cart'} asChild>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}>
                       <Icon as={ShoppingCart} />
                     </TouchableOpacity>
                   </Link>

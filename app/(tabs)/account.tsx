@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { ChevronRight, User, Bell, Moon, CircleHelp as HelpCircle, LogOut } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SettingsScreen() {
   const SettingItem = ({ icon, title }: { icon: React.ReactNode; title: string }) => (
@@ -12,6 +13,15 @@ export default function SettingsScreen() {
     </TouchableOpacity>
   );
 
+    const purgeAllStorage = async() => {
+      try {
+        await AsyncStorage.clear();
+        console.log('✅ All AsyncStorage data cleared');
+      } catch (error) {
+        console.error('❌ Failed to clear AsyncStorage:', error);
+      }
+    }
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
@@ -19,7 +29,7 @@ export default function SettingsScreen() {
         <SettingItem icon={<Bell size={20} color="#000000" />} title="Notifications" />
         {/* <SettingItem icon={<Moon size={20} color="#000000" />} title="Quick Help" /> */}
         <SettingItem icon={<HelpCircle size={20} color="#000000" />} title="Help" />
-        <TouchableOpacity style={styles.logoutButton}>
+        <TouchableOpacity onPress={purgeAllStorage} style={styles.logoutButton}>
           <LogOut size={20} color="#ff4444" />
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>

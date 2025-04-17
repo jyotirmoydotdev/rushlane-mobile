@@ -2,9 +2,10 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import { ProductType } from "../type/productType";
 
 export interface StoreProductsPageResponse {
-  products: any[];
+  products: ProductType[];
   pagination: {
     currentPage: number;
     perPage: number;
@@ -86,6 +87,7 @@ export const useFetchProductsQuery = (
     ...rest
   } = useInfiniteQuery<StoreProductsPageResponse>({
     queryKey: ['storeProducts', searchQuery, selectedCategory, perPage],
+    // @ts-ignore-next-line
     queryFn: fetchProductsFunc,
     initialPageParam: 1,
     keepPreviousData: true,

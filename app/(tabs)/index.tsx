@@ -1,161 +1,30 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, SafeAreaView, Pressable, TouchableOpacity, FlatList } from 'react-native';
+import { View, SafeAreaView, Pressable, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Icon } from '@/components/ui/icon';
 import { type StateCreator } from 'zustand'
 import {
-  ArrowRight,
-  ArrowUp,
-  ChevronDown,
-  ChevronRight,
-  Filter,
-  Home,
-  IndianRupee,
-  LocateIcon,
-  MapPin,
-  Navigation,
-  Percent,
-  Pin,
-  Search,
-  Star,
-  Timer,
-  User
+  ArrowRight, ArrowUp, ChevronDown, ChevronRight, Filter, Home, IndianRupee, LocateIcon, MapPin, Navigation, Percent, Pin, Search, SplineIcon, Star, Timer, User,
+  Utensils
 } from 'lucide-react-native';
 import { ScrollView } from 'react-native';
 import { Link, Tabs, useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { Image } from 'expo-image';
-import Animated, {
-  useAnimatedRef,
-  useAnimatedStyle,
-  useScrollViewOffset,
-  withTiming,
-  FadeIn,
-  SlideInRight,
-  withSpring,
-  useSharedValue
-} from 'react-native-reanimated';
+import Animated, { useAnimatedRef, useAnimatedStyle, useScrollViewOffset, withTiming, FadeIn, SlideInRight, withSpring, useSharedValue } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useFetchStoresQuery } from '@/lib/query/useFetchStoresQuery';
 import { useFetchCategoriesQuery } from '@/lib/query/useFetchCategoriesQuery';
 import { blurhash } from '@/constants/blurHash';
 import { PlaceholdersAndVanishInput } from '@/components/PlaceHolderAndVanish';
-
 import he from 'he'
 import { useLocationState } from '@/lib/state/locationState';
 import { useFetchProductsQuery } from '@/lib/query/useFetchProductsQuery';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useUserLocation } from '@/lib/hooks/useUserLocation';
+import RestaurantCard from '@/components/restaurantCard';
 
-interface RestaurantCardProps {
-  id: number;
-  name: string;
-  address: string;
-  rating: number;
-  imageUrl: string;
-  logoUrl: string;
-  cuisine?: string;
-  deliveryTime?: string;
-  priceRange?: string;
-  discount?: string;
-}
-
-const RestaurantCard = ({
-  id,
-  name,
-  address,
-  rating,
-  imageUrl,
-  logoUrl,
-  cuisine,
-  deliveryTime,
-  priceRange,
-  discount,
-}: RestaurantCardProps) => {
-  return (
-    <View className="bg-white rounded-3xl shadow-sm border border-gray-100">
-      {/* Restaurant Image */}
-      <View className="relative">
-        <Image
-          source={{ uri: imageUrl || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4' }}
-          style={{
-            height: 180,
-            width: '100%',
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20
-          }}
-          className="rounded-t-xl"
-          contentFit="cover"
-          placeholder={{ blurhash }}
-          transition={200}
-        />
-
-        {/* Discount Badge */}
-        {/* <View className="absolute top-3 left-3 bg-foodapp-discount px-2 py-1 rounded-md">
-          <Text className="text-white font-bold text-xs">{discount}</Text>
-        </View> */}
-
-        {/* Restaurant Logo */}
-        <Image
-          style={{
-            position: 'absolute',
-            bottom: 12,
-            right: 12,
-            width: 80,
-            height: 80,
-            borderRadius: 999,
-            backgroundColor: '#e5e7eb'
-          }}
-          source={{
-            uri: logoUrl
-          }}
-        />
-      </View>
-
-      {/* Restaurant Info */}
-      <View className="p-3">
-        {/* Restaurant Name and Logo */}
-        <View className="flex-row items-center justify-between mb-1">
-          <Text className=" font-black text-3xl" numberOfLines={1}>
-            {he.decode(name)}
-          </Text>
-
-          <View className="flex-row items-center bg-foodapp-rating px-2 py-0.5 rounded">
-            <Icon as={Star} size='sm' className="stroke-white fill-white mr-1" />
-            <Text className="text-white font-bold text-xs">{rating}</Text>
-          </View>
-        </View>
-
-        {/* Rating */}
-        <View className='flex-row gap-1 items-center'>
-          {Array.from({ length: 5 }, (_, index) => (
-            <Icon
-              key={index}
-              as={Star}
-              className={`w-3 h-3 ${index < Math.round(Number(rating))
-                ? 'fill-yellow-400 stroke-yellow-500'
-                : 'fill-gray-300 stroke-gray-400'
-                }`}
-            />
-          ))}
-          <Text className='text-sm px-1 text-gray-500'>({rating})</Text>
-        </View>
-
-        {/* Divider */}
-        <View className="h-[1px] bg-gray-100 my-2"></View>
-
-        {/* Delivery Info */}
-        <View className="flex-row items-center w-3/4">
-          <Icon as={MapPin} size='sm' className="mr-1" />
-          <Text className="text-base line-clamp-1">
-            {he.decode(address)}
-          </Text>
-        </View>
-      </View>
-    </View>
-  );
-};
 
 export default function Index() {
   // const [location, setLocation] = useState<Location.LocationObject | null>(null);
@@ -583,8 +452,8 @@ export default function Index() {
     },
   ];
 
-  const {location, isLoading, locationName, error} = useUserLocation()
-
+  const { location, isLoading, locationName, error } = useUserLocation()
+  const [refreshing, setRefreshing] = useState(false);
   const insets = useSafeAreaInsets();
   return (
     <>
@@ -606,7 +475,7 @@ export default function Index() {
                       <View className="ml-1 flex-1">
                         {location && (
                           <Text className="text-lg font-bold text-foodapp-muted">
-                            {isLoading?'Loading...':locationName}
+                            {isLoading ? 'Loading...' : locationName}
                           </Text>
                         )}
                         <View className='flex-row gap-1 items-center'>
@@ -674,6 +543,14 @@ export default function Index() {
         showsVerticalScrollIndicator={false}
         stickyHeaderIndices={[6]}
         className="bg-white"
+        refreshControl={
+          <RefreshControl
+          
+            refreshing={refreshing}
+            colors={['grey']}
+            progressBackgroundColor={'black'}
+          />
+        }
       >
         <Animated.View className='px-4 bg-white rounded-lg' >
           <Image
@@ -753,10 +630,16 @@ export default function Index() {
                   </Text>
                 </Pressable>
               ))}
+              <TouchableOpacity onPress={() => router.push('/categories')} className='items-center mr-4'>
+                <View className='w-20 h-20 flex-row justify-center items-center rounded-full bg-[#EAEAEA] mb-3'>
+                  <Icon as={Utensils} />
+                </View>
+                <Text className='mt-2 w-20 line-clamp-1 text-xs text-[#333] text-center'>View All</Text>
+              </TouchableOpacity>
             </>
           )}
         </ScrollView>
-{/* 
+        {/* 
         <View className="pt-4 bg-white mt-2">
           <Text className="text-lg font-bold  mb-3 px-4">Trending food</Text>
         </View> */}
@@ -1026,7 +909,7 @@ export default function Index() {
                   // discount={store.discount ?? '50% OFF up to ₹100'}
                   />
                 </Pressable>
-                </Link>
+              </Link>
             ))
           )}
         </View>

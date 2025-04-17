@@ -36,6 +36,28 @@ export async function GET(request: Request) {
         apiUrl.searchParams.append('type', 'simple');
         apiUrl.searchParams.append('consumer_secret', String(process.env.EXPO_PUBLIC_CONSUMERSECRET));
         apiUrl.searchParams.append('consumer_key', String(process.env.EXPO_PUBLIC_CONSUMERKEY));
+        apiUrl.searchParams.append('_fields', String([
+            'id',
+            'name',
+            'slug',
+            'type',
+            'status',
+            'description',
+            'price',
+            'regular_price',
+            'sale_price',
+            'on_sale',
+            'average_rating',
+            'rating_count',
+            'categories',
+            'images',
+            'attributes',
+            'variations',
+            'related_ids',
+            'stock_status',
+            'has_options',
+            'store'
+        ]));
 
         for (const [key, value] of Object.entries(queryParams)) {
             if (value !== undefined && key !== 'page' && key !== 'per_page') {

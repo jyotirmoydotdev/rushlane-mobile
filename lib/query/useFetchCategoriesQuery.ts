@@ -3,10 +3,11 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { loadInitialData } from "../utils";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { CategoriesType } from "../type/categoriesType";
 
 
 export interface CategoriesPageResponse {
-    categories: any[];
+    categories: CategoriesType[];
     pagination: {
         currentPage: number;
         perPage: number;
@@ -18,8 +19,8 @@ export interface CategoriesPageResponse {
 
 export const useFetchAllCategoriesQuery = (
     options?: {
-        per_page?: number;
-        search?: string;
+        PerPage?: number;
+        searchQuery?: string;
         orderby?: string;
         order?: 'asc' | 'desc';
     }
@@ -27,12 +28,12 @@ export const useFetchAllCategoriesQuery = (
     const queryClient = useQueryClient();
     const [initialDataLoaded, setInitialDataLoaded] = useState(false);
 
-    const perPage = options?.per_page ?? 10;
-    const search = options?.search ?? undefined;
+    const perPage = options?.PerPage ?? 24;
+    const search = options?.searchQuery ?? undefined;
     const orderby = options?.orderby ?? undefined;
     const order = options?.order ?? undefined;
 
-    const baseCacheKey = `categories_paged_$_${perPage}_${search || ''}_${orderby || ''}_${order || ''}`;
+    const baseCacheKey = `allCategories_paged_$_${perPage}_${search || ''}_${orderby || ''}_${order || ''}`;
 
     useEffect(() => {
         const load = async () => {
@@ -51,9 +52,9 @@ export const useFetchAllCategoriesQuery = (
         load()
     }, [baseCacheKey, perPage, search, orderby, order, queryClient])
 
-    const fetchPage = async ({ pageParan = 1 }) => {
-        const url = new URL(`/api/categories`, window.location.origin);
-        url.searchParams.append('page', pageParan.toString());
+    const fetchPage = async ({ pageParam = 1 }):Promise<CategoriesPageResponse> => {
+        const url = new URL(`/api/allcategories`, window.location.origin);
+        url.searchParams.append('page', pageParam.toString());
         url.searchParams.append('per_page', perPage.toString());
         if (search) url.searchParams.append('search', search);
         if (orderby) url.searchParams.append('orderby', orderby);
@@ -64,7 +65,18 @@ export const useFetchAllCategoriesQuery = (
             const err = await res.json();
             throw new Error(err.message || 'Falied to fetch store categories');
         }
-        return res.json();
+        const data = await res.json();
+
+        return {
+            categories: data.categories || [],
+            pagination: {
+                currentPage: data.pagination.currentPage,
+                perPage: data.pagination.perPage,
+                nextPage: data.pagination.nextPage,
+                prevPage: data.pagination.prevPage,
+                hasNextPage: data.pagination.hasNextPage,
+            }
+        }
     }
 
     const {
@@ -78,6 +90,7 @@ export const useFetchAllCategoriesQuery = (
         ...rest
     } = useInfiniteQuery<CategoriesPageResponse>({
         queryKey: ['categoriesPaged', perPage, search, orderby, order],
+        // @ts-ignore-next-line
         queryFn: fetchPage,
         initialPageParam: 1,
         keepPreviousData: true,

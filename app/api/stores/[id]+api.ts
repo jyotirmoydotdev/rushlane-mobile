@@ -3,7 +3,29 @@ import axios from "axios";
 
 export async function GET(_request: Request, { id }: Record<string, string>): Promise<Response> {
   try {
-    const response = await axios.get<storeResponseType>(`https://www.rushlane.net/wp-json/wcfmmp/v1/store-vendors/${id}`);
+    const response = await axios.get<storeResponseType>(`https://www.rushlane.net/wp-json/wcfmmp/v1/store-vendors/${id}`, {
+      params: {
+        _fields: String([
+          'vendor_id',
+          'vendor_shop_name',
+          'store_hide_email',
+          'disable_vendor',
+          'store_hide_address',
+          'store_hide_description',
+          'store_hide_policy',
+          'email_verified',
+          'vendor_email',
+          'vendor_address',
+          'vendor_description',
+          'vendor_banner',
+          'vendor_banner_type',
+          'mobile_banner',
+          'vendor_shop_logo',
+          'store_rating',
+          'vendor_policies',
+        ])
+      }
+    });
 
     if (response.status !== 200) {
       return Response.json({ error: "Store not found" }, { status: 500 });
@@ -34,7 +56,7 @@ function convertToStoreType(storeData: storeResponseType): storeType {
     name: storeData.vendor_shop_name || "",
     show: {
       email: storeData.store_hide_email !== "yes",
-      phone: storeData.store_hide_phone !== "yes",
+      phone: storeData.store_hide_email !== "yes",
       address: storeData.store_hide_address !== "yes",
       description: storeData.store_hide_description !== "yes",
       policy: storeData.store_hide_policy !== "yes",
