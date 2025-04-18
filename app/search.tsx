@@ -20,7 +20,7 @@ const AnimatedFlatList = Animated.FlatList;
 export default function SearchInput() {
   const {categogries} = useLocalSearchParams<{categogries?: string}>();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setCategory] = useState<number>(Number(categogries) ?? 0);
+  const [selectedCategory, setCategory] = useState<number>(0);
 
   const categories = useFetchCategoriesQuery();
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -220,7 +220,6 @@ export default function SearchInput() {
 
   return (
     <>
-    <Text>categogries: {categogries}</Text>
       <AnimatedFlatList
         onScroll={scrollHandler}
         ref={flatListRef}

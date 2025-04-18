@@ -9,26 +9,14 @@ export interface ProductsQueryParams {
     order?: 'asc' | 'desc';
 }
 
-export async function GET(request: Request) {
-    return Response.json({
-        categories: demoCategory,
-        pagination: {
-            currentPage: 1,
-            perPage: 10,
-            nextPage: null,
-            prevPage: null,
-            hasNextPage: false,
-        },
-    });
-}
 
-export async function GETs(request: Request) {
+export async function GET(request: Request) {
     const url = new URL(request.url)
     const queryParams: ProductsQueryParams = {
         page: url.searchParams.get('page') || '1',
         per_page: parseInt(url.searchParams.get('per_page') || '24', 24),
         search: url.searchParams.get('search') || undefined,
-        orderby: url.searchParams.get('orderby') || 'include',
+        orderby: url.searchParams.get('orderby') || undefined,
         order: (url.searchParams.get('order') as 'asc' | 'desc') || undefined,
     }
     const currentPage = parseInt(queryParams.page!, 10);

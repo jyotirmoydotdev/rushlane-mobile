@@ -240,12 +240,12 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ffffff',
   },
   inputContainer: {
     width: '100%',
     maxWidth: 600,
     height: 48,
+    backgroundColor: '#ffffff',
     borderRadius: 24,
     overflow: 'hidden',
     flexDirection: 'row',

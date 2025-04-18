@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { ActivityIndicator, FlatList, Platform, ScrollView, StyleSheet } from 'react-native';
+import { ActivityIndicator, FlatList, Platform, RefreshControl, ScrollView, StyleSheet } from 'react-native';
 
 import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
@@ -10,11 +10,12 @@ import { Image } from 'expo-image';
 import { blurhash } from '@/constants/blurHash';
 import { Icon } from '@/components/ui/icon';
 import { Search } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function AllCategoriesPage() {
   const fetchAllCategories = useFetchAllCategoriesQuery()
   // @ts-ignore-next-line
-  const allCategories: any[] = fetchAllCategories.data?.pages.flatMap(page => page.categories) || []
+  const allCategories: CategoriesType[] = fetchAllCategories.data?.pages.flatMap(page => page.categories) || []
   const loadMoreCategories = useCallback(() => {
     if (fetchAllCategories.hasNextPage && !fetchAllCategories.isFetchingNextPage) {
       fetchAllCategories.fetchNextPage();
@@ -27,6 +28,12 @@ export default function AllCategoriesPage() {
         onEndReached={loadMoreCategories}
         onEndReachedThreshold={0.5}
         numColumns={4}
+        refreshControl={<RefreshControl
+          refreshing={fetchAllCategories.isRefetching}
+          onRefresh={() => {
+            fetchAllCategories.refetch();
+          }}
+        />}
         ListEmptyComponent={() => {
           if (fetchAllCategories.isLoading || fetchAllCategories.isRefetching) {
             return (
@@ -52,10 +59,11 @@ export default function AllCategoriesPage() {
         style={{
           gap: 20, // Add gap between rows
           padding: 4,
-          backgroundColor: 'white'
+          backgroundColor: 'white',
         }}
         contentContainerStyle={{
         }}
+        ListFooterComponent={<View className='h-20 w-full'></View>}
         renderItem={(data: { index: number; item: CategoriesType }) => (
           <View className='flex-col gap-2 justify-start items-center w-[5rem] ' >
             {/* <View className='bg-blue-500 rounded-full w-[5rem] h-[5rem]' style={{backgroundColor: '#3b82f6'}}>
